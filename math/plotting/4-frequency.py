@@ -4,14 +4,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def frequency():
-    """Draw a bar graph of grade frequencies."""
+def bars():
+    """Create a bar graph representing number of fruit per person."""
     np.random.seed(5)
-    student_grades = np.random.normal(68, 15, 50)
+    fruit = np.random.randint(0, 20, (4, 3))
+
     plt.figure(figsize=(6.4, 4.8))
-    plt.hist(student_grades, bins=np.arange(0, 110, 10), edgecolor='black')
-    plt.title('Project A')
-    plt.xlabel('Grades')
-    plt.xlim(0, 100)
-    plt.ylabel('Number of Students')
+
+    people = ['Farrah', 'Fred', 'Felicia']
+    x = np.arange(len(people))
+
+    colors = {
+        'apples': 'red',
+        'bananas': 'yellow',
+        'oranges': '#ff8000',
+        'peaches': '#ffe5b4'
+    }
+
+    bottom = np.zeros(len(people))
+
+    fruits = ['apples', 'bananas', 'oranges', 'peaches']
+    for i, fruit_name in enumerate(fruits):
+        plt.bar(x, fruit[i], width=0.5, bottom=bottom,
+                color=colors[fruit_name], label=fruit_name)
+        bottom += fruit[i]
+
+    plt.xticks(x, people)
+    plt.ylabel('Quantity of Fruit')
+    plt.ylim(0, 80)
+    plt.yticks(range(0, 81, 10))
+    plt.title('Number of Fruit per Person')
+    plt.legend()
+
     plt.show()
