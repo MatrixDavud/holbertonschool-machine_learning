@@ -9,11 +9,10 @@ def poly_derivative(poly):
         return None
     else:
         if len(poly) == 1:
-            dy = [0]
-            return dy
+            return None
         else:
             if all(coef == 0 for coef in poly):
-                return [0]
+                return None
             dy_list = []
             for i in range(1, len(poly)):
                 dy_list.append(poly[i]*i)
