@@ -4,9 +4,12 @@
 
 def poly_derivative(poly):
     """Return the list of coefs of the dy of the polynomial."""
-    if type(poly) is not list or not \
-            all(isinstance(coef, (int, float)) for coef in poly):
+    if type(poly) is not list:
         return None
+
+    for coef in poly:
+        if not isinstance(coef, (int, float)):
+            return None
 
     if len(poly) == 1:
         return [0]
