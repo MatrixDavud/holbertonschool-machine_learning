@@ -7,7 +7,4 @@ def summation_i_squared(n):
     if type(n) is not int:
         return None
     else:
-        sum = 0
-        for i in range(n+1):
-            sum += i ** 2
-        return sum
+        return int((n * (n+1) * (2*n+1))/6)
