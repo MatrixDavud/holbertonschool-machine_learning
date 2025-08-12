@@ -53,8 +53,7 @@ def all_in_one():
     axs[1, 1].plot(x3, y31, 'r--', label="C-14")
     axs[1, 1].plot(x3, y32, 'g-', label="Ra-226")
     axs[1, 1].axis((0, 20000, 0, 1))
-    axs[1, 1].set_title('Exponential Decay of Radioactive Elements',
-                        fontsize='x-small')
+    axs[1, 1].set_title('Exponential Decay of Radioactive Elements', fontsize='x-small')
     axs[1, 1].set_xlabel('Time (years)', fontsize='x-small')
     axs[1, 1].set_ylabel('Fraction Remaining', fontsize='x-small')
     axs[1, 1].legend(fontsize='x-small')
@@ -68,9 +67,11 @@ def all_in_one():
 
     bins = np.arange(0, 101, 10)
     ax_hist.hist(student_grades, bins=bins, edgecolor='black')
+    ax_hist.axis((0, 100, 0, 30))
     ax_hist.set_title('Project A', fontsize='x-small')
     ax_hist.set_xlabel('Grades', fontsize='x-small')
     ax_hist.set_ylabel('Number of Students', fontsize='x-small')
+    ax_hist.set_xticks(bins)
     ax_hist.tick_params(labelsize='x-small')
 
     fig.suptitle('All in One')
