@@ -7,7 +7,7 @@ def poly_integral(poly, C=0):
     if type(poly) is not list:
         return None
 
-    if not isinstance(C, int):
+    if not (isinstance(C, int) or isinstance(C, float)):
         return None
 
     for coef in poly:
