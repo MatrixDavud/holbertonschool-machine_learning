@@ -25,8 +25,8 @@ def bars():
 
     fruits = ['apples', 'bananas', 'oranges', 'peaches']
     for i, fruit_name in enumerate(fruits):
-        plt.bar(x, fruit[i], width=0.5, bottom=bottom, color=colors[fruit_name],
-                label=fruit_name)
+        plt.bar(x, fruit[i], width=0.5, bottom=bottom,
+                color=colors[fruit_name], label=fruit_name)
         bottom += fruit[i]
 
     plt.xticks(x, people)
