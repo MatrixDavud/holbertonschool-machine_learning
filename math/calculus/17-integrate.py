@@ -13,7 +13,8 @@ def poly_integral(poly, C=0):
     for coef in poly:
         if not isinstance(coef, (int, float)):
             return None
-
+    if len(poly) == 0:
+        return None
     coefs = []
     coefs.append(C)
     for i in range(len(poly)):
