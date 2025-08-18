@@ -131,4 +131,4 @@ class Decision_Tree():
 
     def __str__(self):
         """Print the whole tree in ASCII."""
-        return self.root.__str__()
+        return self.root.__str__() + "\n"
