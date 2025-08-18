@@ -55,11 +55,11 @@ class Node:
 
         if self.left_child:
             left_str = self.left_child.__str__()
-            s += "\n" + self.left_child_add_prefix(left_str)
+            s += "\n" + self.left_child_add_prefix(left_str).rstrip("\n")
 
         if self.right_child:
             right_str = self.right_child.__str__()
-            s += "\n" + self.right_child_add_prefix(right_str)
+            s += "\n" + self.right_child_add_prefix(right_str).rstrip("\n")
 
         return s
 
