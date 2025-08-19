@@ -131,7 +131,7 @@ class Node:
                       for key in self.upper.keys()]
             return np.all(np.array(checks), axis=0)
 
-        self.indicator = lambda x:\
+        self.indicator = lambda x: \
             np.logical_and(is_large_enough(x), is_small_enough(x))
 
 
