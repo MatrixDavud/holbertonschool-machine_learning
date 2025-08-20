@@ -245,12 +245,13 @@ class Decision_Tree():
 
         self.update_predict()
 
+        a1, a2 = self.explanatory, self.target
         if verbose == 1:
             print(f"""  Training finished.
     - Depth                     : { self.depth()       }
     - Number of nodes           : { self.count_nodes() }
     - Number of leaves          : { self.count_nodes(only_leaves=True) }
-    - Accuracy on training data : { self.accuracy(self.explanatory,self.target)    }""")
+    - Accuracy on training data : { self.accuracy(a1, a2)    }""")
 
     def np_extrema(self, arr):
         """Return the minimum and maximum of the array."""
@@ -261,7 +262,8 @@ class Decision_Tree():
         diff = 0
         while diff == 0:
             feature = self.rng.integers(0, self.explanatory.shape[1])
-            feature_min, feature_max = self.np_extrema(self.explanatory[:, feature][node.sub_population])
+            column_values = self.explanatory[:, feature][node.sub_population]
+            feature_min, feature_max = self.np_extrema(column_values)
             diff = feature_max-feature_min
         x = self.rng.uniform()
         threshold = (1-x)*feature_min + x*feature_max
@@ -278,7 +280,7 @@ class Decision_Tree():
         # 3. All individuals have same target value (pure class)
         if (node.sub_population.sum() < self.min_pop or
             node.depth >= self.max_depth or
-              len(np.unique(y_node)) == 1):
+                len(np.unique(y_node)) == 1):
 
             # Make this node a leaf with most represented class
             values, counts = np.unique(y_node, return_counts=True)
@@ -304,7 +306,7 @@ class Decision_Tree():
             node.threshold = None
             return
 
-        # Vectorized split: individuals go left if feature > threshold, right otherwise
+        # Vectorized split
         feature_values = self.explanatory[node.sub_population, node.feature]
         left_mask_local = feature_values > node.threshold
         right_mask_local = ~left_mask_local
@@ -379,21 +381,21 @@ class Decision_Tree():
 
         # Combine conditions using broadcasting to get shape (n, t, c)
         # Left_F[i, j, k] = feature_condition[i, j] AND class_condition[i, k]
-        Left_F = feature_condition[:, :, np.newaxis] & class_condition[:, np.newaxis, :]
+        Left_F = feature_condition[:, :, np.newaxis] &\
+            class_condition[:, np.newaxis, :]
 
-        # Right_F is the complement for the same classes but opposite feature condition
-        # Right_F[i, j, k] = (feature value <= threshold) AND (individual is of class k)
-        feature_condition_right = x_node[:, np.newaxis] <= thresholds[np.newaxis, :]
-        Right_F = feature_condition_right[:, :, np.newaxis] & class_condition[:, np.newaxis, :]
+        feature_condition_right = x_node[:, np.newaxis]\
+            <= thresholds[np.newaxis, :]
+        Right_F = feature_condition_right[:, :, np.newaxis] &\
+            class_condition[:, np.newaxis, :]
 
         # Sum over individuals (axis=0) to get class counts for each threshold
-        # Shape becomes (t, c) - counts[j, k] = number of individuals of class k in left/right child for threshold j
         left_counts = Left_F.sum(axis=0)   # shape (t, c)
-        right_counts = Right_F.sum(axis=0) # shape (t, c)
+        right_counts = Right_F.sum(axis=0)  # shape (t, c)
 
         # Total individuals in left and right for each threshold
         left_totals = left_counts.sum(axis=1)   # shape (t,)
-        right_totals = right_counts.sum(axis=1) # shape (t,)
+        right_totals = right_counts.sum(axis=1)  # shape (t,)
 
         # Compute Gini impurity for left and right children
         # Gini = 1 - sum(p_k^2) where p_k = class_count / total_count
@@ -403,22 +405,23 @@ class Decision_Tree():
         right_totals_safe = np.where(right_totals == 0, 1, right_totals)
 
         # Compute proportions
-        left_proportions = left_counts / left_totals_safe[:, np.newaxis]   # shape (t, c)
-        right_proportions = right_counts / right_totals_safe[:, np.newaxis] # shape (t, c)
+        left_proportions = left_counts / left_totals_safe[:, np.newaxis]
+        right_proportions = right_counts / right_totals_safe[:, np.newaxis]
 
         # Compute Gini impurity: 1 - sum(p_k^2)
         left_gini = 1 - np.sum(left_proportions ** 2, axis=1)  # shape (t,)
-        right_gini = 1 - np.sum(right_proportions ** 2, axis=1) # shape (t,)
+        right_gini = 1 - np.sum(right_proportions ** 2, axis=1)  # shape (t,)
 
         # Set Gini to 0 for empty children (perfectly pure by definition)
         left_gini = np.where(left_totals == 0, 0, left_gini)
         right_gini = np.where(right_totals == 0, 0, right_gini)
 
         # Compute weighted average Gini impurity for each threshold
-        total_size = left_totals + right_totals  # Should equal n_individuals for all thresholds
+        total_size = left_totals + right_totals
 
-        # Weighted average: (left_size * left_gini + right_size * right_gini) / total_size
-        avg_gini = (left_gini * left_totals + right_gini * right_totals) / total_size
+        # Weighted average
+        sum_gini = left_gini * left_totals + right_gini * right_totals
+        avg_gini = sum_gini / total_size
 
         # Find threshold with minimum average Gini
         best_idx = np.argmin(avg_gini)
@@ -427,7 +430,7 @@ class Decision_Tree():
 
     def Gini_split_criterion(self, node):
         """Find feature and threshold with lowest Gini impurity for a node."""
-        X = np.array([self.Gini_split_criterion_one_feature(node, i) 
+        X = np.array([self.Gini_split_criterion_one_feature(node, i)
                      for i in range(self.explanatory.shape[1])])
         i = np.argmin(X[:, 1])
         return i, X[i, 0]
