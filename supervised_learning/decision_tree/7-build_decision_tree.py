@@ -190,7 +190,7 @@ class Decision_Tree():
             self.root = Node(is_root=True)
         self.explanatory = None
         self.target = None
-        self.max_depth = max_depth - 11
+        self.max_depth = max_depth
         self.min_pop = min_pop
         self.split_criterion = split_criterion
         self.predict = None
