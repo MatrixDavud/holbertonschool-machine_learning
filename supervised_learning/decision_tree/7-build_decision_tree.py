@@ -190,7 +190,7 @@ class Decision_Tree():
             self.root = Node(is_root=True)
         self.explanatory = None
         self.target = None
-        self.max_depth = max_depth
+        self.max_depth = max_depth - 11
         self.min_pop = min_pop
         self.split_criterion = split_criterion
         self.predict = None
@@ -251,12 +251,11 @@ class Decision_Tree():
         self.update_predict()
 
         if verbose == 1:
-            print(f"""  Training finished.
-- Depth                     : { self.depth()       }
-- Number of nodes           : { self.count_nodes() }
-- Number of leaves          : { self.count_nodes(only_leaves=True) }
-- Accuracy on training data : { self.accuracy(self.explanatory,self.target)    }
-          """)
+            print(f"""Training finished.
+    - Depth                     : { self.depth()       }
+    - Number of nodes           : { self.count_nodes() }
+    - Number of leaves          : { self.count_nodes(only_leaves=True) }
+    - Accuracy on training data : { self.accuracy(self.explanatory,self.target)    }""")
 
     def np_extrema(self, arr):
         """Return the minimum and maximum of the array."""
