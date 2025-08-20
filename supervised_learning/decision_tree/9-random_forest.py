@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Random Forest Algorithm."""
-Decision_Tree = __import__('8-build_decision_tree').Decision_Tree
+Decision_Tree = __import__('8-build_decision_tree').Decision_Tree  # noqa: E402
 import numpy as np
 
 
