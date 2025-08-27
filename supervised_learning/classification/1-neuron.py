@@ -31,4 +31,3 @@ class Neuron:
     def A(self):
         """Get the value of prediction."""
         return self.__A
-
