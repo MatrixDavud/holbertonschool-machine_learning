@@ -51,5 +51,5 @@ class Neuron:
         p = 1 / (1 + np.exp(-z))
         cost = np.sum((Y*np.log(p) + (1 - Y)*np.log(1.0000001 - p)))
         cost = cost / -Y.shape[1]
-        labels = [(1 if x >= 0.5 else 0) for x in p[0]]
+        labels = np.where(p >= 0.5, 1, 0)
         return labels, cost
