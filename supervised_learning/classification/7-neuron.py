@@ -82,11 +82,11 @@ class Neuron:
 
         costs, iteration_list = [], []
 
-        for iteration in range(iterations):
+        for iteration in range(iterations + 1):
             A = self.forward_prop(X)
             self.gradient_descent(X, Y, A, alpha)
 
-            if (iteration % step == 0) or (iteration == iterations - 1):
+            if (iteration % step == 0) or (iteration == iterations):
                 cost = self.cost(Y, A)
                 if verbose:
                     print(f"Cost after {iteration} iterations: {cost}")
