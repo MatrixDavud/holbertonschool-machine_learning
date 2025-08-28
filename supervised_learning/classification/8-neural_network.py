@@ -19,7 +19,7 @@ class NeuralNetwork:
 
         self.nx = nx
         self.nodes = nodes
- 
+
         # Hidden layer
         self.W1 = np.random.normal(size=(nodes, nx))
         self.b1 = np.zeros((nodes, 1))
