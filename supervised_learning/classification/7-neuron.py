@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Classification algorithm implementation."""
+"""Classification algorithm implementation (only Neuron class)."""
 import numpy as np
 import matplotlib.pyplot as plt
 
