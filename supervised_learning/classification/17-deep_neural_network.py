@@ -22,20 +22,17 @@ class DeepNeuralNetwork:
         self.__cache = {}
         self.__weights = {}
 
-        for l in range(1, self.__L + 1):
-            # number of nodes in current layer
-            nodes = layers[l - 1]
+        for l in range(self.__L):
+            if not isinstance(layers[l], int) or layers[l] <= 0:
+                raise TypeError("layers must be a list of positive integers")
 
-            # number of nodes in the previous layer (nx for first layer)
-            prev_nodes = nx if l == 1 else layers[l - 2]
+            nodes = layers[l]
+            prev_nodes = nx if l == 0 else layers[l - 1]
 
-            # He initialization for weights
-            self.__weights["W{}".format(l)] = (
+            self.__weights["W{}".format(l + 1)] = (
                 np.random.randn(nodes, prev_nodes) * np.sqrt(2 / prev_nodes)
             )
-
-            # Bias initialized as zeros
-            self.__weights["b{}".format(l)] = np.zeros((nodes, 1))
+            self.__weights["b{}".format(l + 1)] = np.zeros((nodes, 1))
 
     @property
     def L(self):
