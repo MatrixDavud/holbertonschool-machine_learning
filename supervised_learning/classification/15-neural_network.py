@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib as plt
 
+
 class NeuralNetwork:
     """Neural Network class."""
 
