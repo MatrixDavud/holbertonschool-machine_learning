@@ -82,11 +82,9 @@ class DeepNeuralNetwork:
             dwl = (dZl @ Al.T) / m
             dbl = (np.sum(dZl, axis=1, keepdims=True)) / m
 
-
-            self.__weights['W{}'.format(i)] -= alpha * dwl
-            self.__weights['b{}'.format(i)] -= alpha * dbl
-
             Al_prev = cache['A{}'.format(i-1)]
             Wl = self.__weights['W{}'.format(i)]
             if i > 1:
                 dZl = (Wl.T @ dZl) * (Al_prev * (1-Al_prev))
+            self.__weights['W{}'.format(i)] -= alpha * dwl
+            self.__weights['b{}'.format(i)] -= alpha * dbl
