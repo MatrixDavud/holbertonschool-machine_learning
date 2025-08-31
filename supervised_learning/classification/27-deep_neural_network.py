@@ -59,7 +59,7 @@ class DeepNeuralNetwork:
 
             if i == self.__L:  # Output layer
                 # Softmax activation
-                t = np.exp(z - np.max(z, axis=0, keepdims=True))
+                t = np.exp(z) / np.sum(np.exp(z), axis=0, keepdims=True)
                 A = t / np.sum(t, axis=0, keepdims=True)
             else:
                 # Hidden layers
