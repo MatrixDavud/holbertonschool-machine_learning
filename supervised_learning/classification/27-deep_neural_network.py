@@ -61,11 +61,11 @@ class DeepNeuralNetwork:
                 # Softmax activation
                 t = np.exp(z - np.max(z, axis=0, keepdims=True))
                 A = t / np.sum(t, axis=0, keepdims=True)
-        else:
-            # Hidden layers
-            A = 1 / (1 + np.exp(-z))  # sigmoid
+            else:
+                # Hidden layers
+                A = 1 / (1 + np.exp(-z))  # sigmoid
 
-        self.__cache['A{}'.format(i)] = A
+            self.__cache['A{}'.format(i)] = A
 
         return self.__cache['A{}'.format(self.__L)], self.__cache
 
