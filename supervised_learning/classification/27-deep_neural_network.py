@@ -53,17 +53,26 @@ class DeepNeuralNetwork:
         self.__cache['A0'] = X
         for i in range(1, self.__L + 1):
             W = self.__weights['W{}'.format(i)]
-            A = self.__cache['A{}'.format(i-1)]
+            A_prev = self.__cache['A{}'.format(i-1)]
             b = self.__weights['b{}'.format(i)]
-            z = np.dot(W, A) + b
-            self.__cache['A{}'.format(i)] = 1 / (1 + np.exp(-z))
+            z = np.dot(W, A_prev) + b
+
+            if i == self.__L:  # Output layer
+                # Softmax activation
+                t = np.exp(z - np.max(z, axis=0, keepdims=True))
+                A = t / np.sum(t, axis=0, keepdims=True)
+        else:
+            # Hidden layers
+            A = 1 / (1 + np.exp(-z))  # sigmoid
+
+        self.__cache['A{}'.format(i)] = A
 
         return self.__cache['A{}'.format(self.__L)], self.__cache
 
     def cost(self, Y, A):
         """Calculate the cost of the model using logistic regression."""
-        cost = np.sum((Y*np.log(A) + (1 - Y)*np.log(1.0000001 - A)))
-        cost = cost / -Y.shape[1]
+        m = Y.shape[1]
+        cost = -np.sum(Y * np.log(A)) / m
         return cost
 
     def evaluate(self, X, Y):
@@ -71,7 +80,7 @@ class DeepNeuralNetwork:
         self.forward_prop(X)
         p = self.__cache['A{}'.format(self.__L)]
         cost = self.cost(Y, p)
-        labels = np.where(p >= 0.5, 1, 0)
+        labels = np.argmax(p, axis=0)
         return labels, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
