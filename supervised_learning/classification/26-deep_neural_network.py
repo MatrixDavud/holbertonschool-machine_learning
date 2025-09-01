@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Classification algorithm using Deep Neural Network (DNN class)."""
+"""Classification algorithm using Deep Neural Network (DNN class) for multiclass classification."""
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import pickle
 
 
 class DeepNeuralNetwork:
-    """Deep Neural Network class."""
+    """Deep Neural Network class for multiclass classification."""
 
     def __init__(self, nx, layers):
         """Construct the deep neural network object."""
@@ -62,8 +62,8 @@ class DeepNeuralNetwork:
 
     def cost(self, Y, A):
         """Calculate the cost of the model using logistic regression."""
-        cost = np.sum((Y*np.log(A) + (1 - Y)*np.log(1.0000001 - A)))
-        cost = cost / -Y.shape[1]
+        m = Y.shape[1]
+        cost = -np.sum((Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))) / m
         return cost
 
     def evaluate(self, X, Y):
@@ -79,15 +79,17 @@ class DeepNeuralNetwork:
         m = Y.shape[1]
         AL = cache['A{}'.format(self.__L)]
         dZl = AL - Y
+        
         for i in range(self.__L, 0, -1):
             Al = cache['A{}'.format(i-1)]
             dwl = (dZl @ Al.T) / m
             dbl = (np.sum(dZl, axis=1, keepdims=True)) / m
 
-            Al_prev = cache['A{}'.format(i-1)]
-            Wl = self.__weights['W{}'.format(i)]
             if i > 1:
+                Al_prev = cache['A{}'.format(i-1)]
+                Wl = self.__weights['W{}'.format(i)]
                 dZl = (Wl.T @ dZl) * (Al_prev * (1-Al_prev))
+            
             self.__weights['W{}'.format(i)] -= alpha * dwl
             self.__weights['b{}'.format(i)] -= alpha * dbl
 
