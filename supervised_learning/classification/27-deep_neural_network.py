@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Classification algorithm using Deep Neural Network (DNN class)."""
+"""Classification algorithm using Deep Neural Network (DNN class) for multiclass classification."""
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import pickle
 
 
 class DeepNeuralNetwork:
-    """Deep Neural Network class."""
+    """Deep Neural Network class for multiclass classification."""
 
     def __init__(self, nx, layers):
         """Construct the deep neural network object."""
@@ -53,50 +53,52 @@ class DeepNeuralNetwork:
         self.__cache['A0'] = X
         for i in range(1, self.__L + 1):
             W = self.__weights['W{}'.format(i)]
-            A_prev = self.__cache['A{}'.format(i-1)]
+            A = self.__cache['A{}'.format(i-1)]
             b = self.__weights['b{}'.format(i)]
-            z = np.dot(W, A_prev) + b
-
-            if i == self.__L:  # Output layer
-                # Softmax activation
-                t = np.exp(z) / np.sum(np.exp(z), axis=0, keepdims=True)
-                A = t / np.sum(t, axis=0, keepdims=True)
+            z = np.dot(W, A) + b
+            
+            if i == self.__L:
+                exp_z = np.exp(z - np.max(z, axis=0, keepdims=True))
+                self.__cache['A{}'.format(i)] = exp_z / np.sum(exp_z, axis=0, keepdims=True)
             else:
-                # Hidden layers
-                A = 1 / (1 + np.exp(-z))  # sigmoid
-
-            self.__cache['A{}'.format(i)] = A
+                self.__cache['A{}'.format(i)] = 1 / (1 + np.exp(-z))
 
         return self.__cache['A{}'.format(self.__L)], self.__cache
 
     def cost(self, Y, A):
-        """Calculate the cost of the model using logistic regression."""
+        """Calculate the cost using categorical cross-entropy."""
         m = Y.shape[1]
-        cost = -np.sum(Y * np.log(A)) / m
+        cost = -np.sum(Y * np.log(A + 1e-15)) / m
         return cost
 
     def evaluate(self, X, Y):
         """Evaluate the neural network's predictions."""
         self.forward_prop(X)
-        p = self.__cache['A{}'.format(self.__L)]
-        cost = self.cost(Y, p)
-        labels = np.argmax(p, axis=0)
-        return labels, cost
+        A = self.__cache['A{}'.format(self.__L)]
+        cost = self.cost(Y, A)
+        
+        predictions = np.zeros_like(A)
+        max_indices = np.argmax(A, axis=0)
+        predictions[max_indices, np.arange(A.shape[1])] = 1
+        
+        return predictions, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
         """Calculate one pass of gradient descent on the neural network."""
         m = Y.shape[1]
         AL = cache['A{}'.format(self.__L)]
         dZl = AL - Y
+        
         for i in range(self.__L, 0, -1):
             Al = cache['A{}'.format(i-1)]
             dwl = (dZl @ Al.T) / m
             dbl = (np.sum(dZl, axis=1, keepdims=True)) / m
 
-            Al_prev = cache['A{}'.format(i-1)]
-            Wl = self.__weights['W{}'.format(i)]
             if i > 1:
+                Al_prev = cache['A{}'.format(i-1)]
+                Wl = self.__weights['W{}'.format(i)]
                 dZl = (Wl.T @ dZl) * (Al_prev * (1-Al_prev))
+            
             self.__weights['W{}'.format(i)] -= alpha * dwl
             self.__weights['b{}'.format(i)] -= alpha * dbl
 
