@@ -130,6 +130,7 @@ class DeepNeuralNetwork:
             plt.title("Training cost")
             plt.show()
 
+        self.forward_prop(X)
         return self.evaluate(X, Y)
 
     def save(self, filename):
