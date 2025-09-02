@@ -65,10 +65,11 @@ class DeepNeuralNetwork:
             A = self.__cache['A{}'.format(i-1)]
             b = self.__weights['b{}'.format(i)]
             z = np.dot(W, A) + b
-            
+
             if i == self.__L:
                 exp_z = np.exp(z - np.max(z, axis=0, keepdims=True))
-                self.__cache['A{}'.format(i)] = exp_z / np.sum(exp_z, axis=0, keepdims=True)
+                self.__cache['A{}'.format(i)] = \
+                    exp_z / np.sum(exp_z, axis=0, keepdims=True)
             else:
                 self.__cache['A{}'.format(i)] = 1 / (1 + np.exp(-z))
 
@@ -85,11 +86,11 @@ class DeepNeuralNetwork:
         self.forward_prop(X)
         A = self.__cache['A{}'.format(self.__L)]
         cost = self.cost(Y, A)
-        
+
         predictions = np.zeros_like(A)
         max_indices = np.argmax(A, axis=0)
         predictions[max_indices, np.arange(A.shape[1])] = 1
-        
+
         return predictions, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
