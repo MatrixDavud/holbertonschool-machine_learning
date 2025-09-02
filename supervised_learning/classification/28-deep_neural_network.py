@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Classification algorithm using Deep Neural Network (DNN class) for multiclass classification."""
+"""Classification algorithm using DNN class for multiclass classification."""
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
@@ -64,7 +64,7 @@ class DeepNeuralNetwork:
             A = self.__cache['A{}'.format(i-1)]
             b = self.__weights['b{}'.format(i)]
             z = np.dot(W, A) + b
-            
+
             if i == self.__L:
                 # Softmax activation for output layer (multiclass)
                 exp_z = np.exp(z - np.max(z, axis=0, keepdims=True))
