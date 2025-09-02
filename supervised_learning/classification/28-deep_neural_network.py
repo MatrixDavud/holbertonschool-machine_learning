@@ -89,31 +89,45 @@ class DeepNeuralNetwork:
         """Evaluate the neural network's predictions."""
         self.forward_prop(X)
         A = self.__cache['A{}'.format(self.__L)]
-        prediction = np.eye(A.shape[0])[np.argmax(A, axis=0)].T
         cost = self.cost(Y, A)
-
-        return prediction, cost
+        
+        # Convert predictions to class labels (one-hot format)
+        predictions = np.zeros_like(A)
+        max_indices = np.argmax(A, axis=0)
+        predictions[max_indices, np.arange(A.shape[1])] = 1
+        
+        return predictions, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
-        """Calculate one pass of gradient descent on the neural network."""
-        m = Y.shape[1]
-        AL = cache['A{}'.format(self.__L)]
-        dZl = AL - Y
-        for i in range(self.__L, 0, -1):
-            Al = cache['A{}'.format(i-1)]
-            dwl = (dZl @ Al.T) / m
-            dbl = (np.sum(dZl, axis=1, keepdims=True)) / m
+        """ Calculate one pass of gradient descent on the neural network
 
-            Al_prev = cache['A{}'.format(i-1)]
-            Wl = self.__weights['W{}'.format(i)]
-            if i > 1:
-                # Calculate dZl for previous layer based on activation function
-                if self.__activation == 'sig':
-                    dZl = (Wl.T @ dZl) * (Al_prev * (1-Al_prev))
-                elif self.__activation == 'tanh':
-                    dZl = (Wl.T @ dZl) * (1 - Al_prev * Al_prev)
-            self.__weights['W{}'.format(i)] -= alpha * dwl
-            self.__weights['b{}'.format(i)] -= alpha * dbl
+        Args:
+            Y (numpy.array): Actual one-hot encoded labels
+            cache (dict): Dictionary containing all intermediary values of the
+                        network
+            alpha (float): learning rate
+        """
+        m = Y.shape[1]
+
+        for i in range(self.L, 0, -1):
+
+            A_prev = cache["A" + str(i - 1)]
+            A = cache["A" + str(i)]
+            W = self.weights["W" + str(i)]
+
+            if i == self.L:
+                dz = A - Y
+            else:
+                if self.activation == 'sig':
+                    dz = da * (A * (1 - A))  # sigmoid derivative
+                elif self.activation == 'tanh':
+                    dz = da * (1 - A**2)  # tanh derivative
+
+            db = dz.mean(axis=1, keepdims=True)
+            dw = np.matmul(dz, A_prev.T) / m
+            da = np.matmul(W.T, dz)
+            self.weights['W' + str(i)] -= (alpha * dw)
+            self.weights['b' + str(i)] -= (alpha * db)
 
     def train(self, X, Y, iterations=5000, alpha=0.05, verbose=True, graph=True, step=100):
         """Train the deep neural network."""
