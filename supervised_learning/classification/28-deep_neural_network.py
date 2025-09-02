@@ -68,7 +68,7 @@ class DeepNeuralNetwork:
             # Use softmax for the output layer, specified activation for hidden layers
             if i == self.__L:
                 # Softmax activation for output layer (multiclass)
-                exp_z = np.exp(z)
+                exp_z = np.exp(z - np.max(z, axis=0, keepdims=True))  # Numerical stability
                 self.__cache['A{}'.format(i)] = exp_z / np.sum(exp_z, axis=0, keepdims=True)
             else:
                 # Use specified activation function for hidden layers
@@ -82,7 +82,7 @@ class DeepNeuralNetwork:
     def cost(self, Y, A):
         """Calculate the cost of the model using logistic regression."""
         m = Y.shape[1]
-        cost = -np.sum(Y * np.log(A + 1e-15)) / m
+        cost = -np.sum(Y * np.log(A)) / m
         return cost
 
     def evaluate(self, X, Y):
