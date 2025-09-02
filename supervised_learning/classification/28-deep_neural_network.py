@@ -89,14 +89,10 @@ class DeepNeuralNetwork:
         """Evaluate the neural network's predictions."""
         self.forward_prop(X)
         A = self.__cache['A{}'.format(self.__L)]
+        prediction = np.eye(A.shape[0])[np.argmax(A, axis=0)].T
         cost = self.cost(Y, A)
-        
-        # Convert predictions to class labels (one-hot format)
-        predictions = np.zeros_like(A)
-        max_indices = np.argmax(A, axis=0)
-        predictions[max_indices, np.arange(A.shape[1])] = 1
-        
-        return predictions, cost
+
+        return prediction, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
         """Calculate one pass of gradient descent on the neural network."""
