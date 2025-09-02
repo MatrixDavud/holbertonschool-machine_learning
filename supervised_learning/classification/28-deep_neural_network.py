@@ -65,11 +65,11 @@ class DeepNeuralNetwork:
             b = self.__weights['b{}'.format(i)]
             z = np.dot(W, A) + b
             
-            # Use softmax for the output layer, specified activation for hidden layers
             if i == self.__L:
                 # Softmax activation for output layer (multiclass)
-                exp_z = np.exp(z - np.max(z, axis=0, keepdims=True))  # Numerical stability
-                self.__cache['A{}'.format(i)] = exp_z / np.sum(exp_z, axis=0, keepdims=True)
+                exp_z = np.exp(z - np.max(z, axis=0, keepdims=True))
+                self.__cache['A{}'.format(i)] = \
+                    exp_z / np.sum(exp_z, axis=0, keepdims=True)
             else:
                 # Use specified activation function for hidden layers
                 if self.__activation == 'sig':
@@ -90,23 +90,16 @@ class DeepNeuralNetwork:
         self.forward_prop(X)
         A = self.__cache['A{}'.format(self.__L)]
         cost = self.cost(Y, A)
-        
+
         # Convert predictions to class labels (one-hot format)
         predictions = np.zeros_like(A)
         max_indices = np.argmax(A, axis=0)
         predictions[max_indices, np.arange(A.shape[1])] = 1
-        
+
         return predictions, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
-        """ Calculate one pass of gradient descent on the neural network
-
-        Args:
-            Y (numpy.array): Actual one-hot encoded labels
-            cache (dict): Dictionary containing all intermediary values of the
-                        network
-            alpha (float): learning rate
-        """
+        """ Calculate one pass of gradient descent on the neural network."""
         m = Y.shape[1]
 
         for i in range(self.L, 0, -1):
@@ -131,27 +124,7 @@ class DeepNeuralNetwork:
 
     def train(self, X, Y, iterations=5000,
               alpha=0.05, verbose=True, graph=True, step=100):
-        """ Train the deep neural network
-
-        Args:
-            X (_type_): _description_
-            Y (_type_): _description_
-            iterations (int, optional): _description_. Defaults to 5000.
-            alpha (float, optional): _description_. Defaults to 0.05.
-            verbose (bool, optional): _description_. Defaults to True.
-            graph (bool, optional): _description_. Defaults to True.
-            step (int, optional): _description_. Defaults to 100.
-
-        Raises:
-            TypeError: _description_
-            ValueError: _description_
-            TypeError: _description_
-            ValueError: _description_
-
-        Returns:
-            _type_: _description_
-        """
-
+        """ Train the deep neural network."""
         if not isinstance(iterations, int):
             raise TypeError('iterations must be an integer')
         if iterations < 1:
