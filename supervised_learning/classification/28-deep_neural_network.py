@@ -129,44 +129,53 @@ class DeepNeuralNetwork:
             self.weights['W' + str(i)] -= (alpha * dw)
             self.weights['b' + str(i)] -= (alpha * db)
 
-    def train(self, X, Y, iterations=5000, alpha=0.05, verbose=True, graph=True, step=100):
-        """Train the deep neural network."""
+    def train(self, X, Y, iterations=5000,
+              alpha=0.05, verbose=True, graph=True, step=100):
+        """ Train the deep neural network
+
+        Args:
+            X (_type_): _description_
+            Y (_type_): _description_
+            iterations (int, optional): _description_. Defaults to 5000.
+            alpha (float, optional): _description_. Defaults to 0.05.
+            verbose (bool, optional): _description_. Defaults to True.
+            graph (bool, optional): _description_. Defaults to True.
+            step (int, optional): _description_. Defaults to 100.
+
+        Raises:
+            TypeError: _description_
+            ValueError: _description_
+            TypeError: _description_
+            ValueError: _description_
+
+        Returns:
+            _type_: _description_
+        """
+
         if not isinstance(iterations, int):
-            raise TypeError("iterations must be an integer")
-        if iterations <= 0:
-            raise ValueError("iterations must be a positive integer")
+            raise TypeError('iterations must be an integer')
+        if iterations < 1:
+            raise ValueError('iterations must be a positive integer')
         if not isinstance(alpha, float):
-            raise TypeError("alpha must be a float")
-        if alpha <= 0:
-            raise ValueError("alpha must be positive")
-        if graph or verbose:
-            if not isinstance(step, int):
-                raise TypeError("step must be an integer")
-            if step <= 0 or step > iterations:
-                raise ValueError("step must be positive and <= iterations")
+            raise TypeError('alpha must be a float')
+        if alpha < 0:
+            raise ValueError('alpha must be positive')
 
-        costs, iteration_list = [], []
+        costs = []
+        for i in range(iterations):
+            self.forward_prop(X)
+            self.gradient_descent(Y, self.cache, alpha)
+            if verbose and i % step == 0:
 
-        for iteration in range(iterations + 1):
-            cache_l, cache = self.forward_prop(X)
-            self.gradient_descent(Y, cache, alpha)
-
-            if (iteration % step == 0) or (iteration == iterations):
-                cost = self.cost(Y, cache_l)
-                if verbose:
-                    print(f"Cost after {iteration} iterations: {cost}")
-                if graph:
-                    costs.append(cost)
-                    iteration_list.append(iteration)
-
+                cost = self.cost(Y, self.cache["A"+str(self.L)])
+                costs.append(cost)
+                print('Cost after {} iterations: {}'.format(i, cost))
         if graph:
-            plt.plot(iteration_list, costs)
-            plt.xlabel("iteration")
-            plt.ylabel("cost")
-            plt.title("Training cost")
+            plt.plot(np.arange(0, iterations, step), costs)
+            plt.xlabel('iteration')
+            plt.ylabel('cost')
+            plt.title('Training Cost')
             plt.show()
-
-        self.forward_prop(X)
         return self.evaluate(X, Y)
 
     def save(self, filename):
