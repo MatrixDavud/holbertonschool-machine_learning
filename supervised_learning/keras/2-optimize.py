@@ -1,4 +1,4 @@
-#!/usr/bin/env python 3
+#!/usr/bin/env python3
 """Building a model with keras library."""
 import tensorflow.keras as K
 
