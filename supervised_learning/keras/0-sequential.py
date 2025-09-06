@@ -16,7 +16,7 @@ def build_model(nx, layers, activations, lambtha, keep_prob):
         )
     )
 
-    if keep_prob < 1:
+    if keep_prob < 1 and len(layers) > 1:
         model.add(K.layers.Dropout(1 - keep_prob))
 
     for i in range(1, len(layers)):
@@ -27,7 +27,7 @@ def build_model(nx, layers, activations, lambtha, keep_prob):
                 kernel_regularizer=K.regularizers.l2(lambtha),
             )
         )
-        if keep_prob < 1:
+        if keep_prob < 1 and i < len(layers) - 1:
             model.add(K.layers.Dropout(1 - keep_prob))
 
     return model
