@@ -10,4 +10,4 @@ def test_model(network, data, labels, verbose=True):
         y=labels,
         verbose=verbose
     )
-    return loss, accuracy
+    return (loss, accuracy)
