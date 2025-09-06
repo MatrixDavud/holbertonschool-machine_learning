@@ -23,7 +23,10 @@ def train_model(network, data, labels, batch_size, epochs,
         def scheduler(epoch, lr):
             """Inverse time decay: lr = alpha / (1 + decay_rate * epoch)"""
             return alpha / (1 + decay_rate * epoch)
-        lr_callback = K.callbacks.LearningRateScheduler(schedule=scheduler)
+        lr_callback = K.callbacks.LearningRateScheduler(
+            schedule=scheduler,
+            verbose=1
+        )
         callbacks.append(lr_callback)
 
     history = network.fit(
