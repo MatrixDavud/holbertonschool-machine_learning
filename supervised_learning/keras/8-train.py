@@ -39,7 +39,7 @@ def train_model(network, data, labels, batch_size, epochs,
             save_best_only=True,
             mode='min',
             save_weights_only=False,
-            verbose=1
+            verbose=0
         )
         callbacks.append(checkpoint)
 
