@@ -18,7 +18,7 @@ def create_batch_norm_layer(prev, n, activation):
         epsilon=1e-7,
         gamma_initializer='ones',
         beta_initializer='zeros'
-    )(dense)
+    )(dense, training=True)
 
     output = tf.keras.layers.Activation(activation)(bn)
 
