@@ -9,6 +9,7 @@ def create_batch_norm_layer(prev, n, activation):
         units=n,
         kernel_initializer=tf.keras.initializers.VarianceScaling(
             mode='fan_avg'),
+        use_bias=False
     )(prev)
 
     bn = tf.keras.layers.BatchNormalization(
