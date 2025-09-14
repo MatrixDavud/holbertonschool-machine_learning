@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Implementing optimizations."""
-import numpy as np
 
 
 def moving_average(data, beta):
