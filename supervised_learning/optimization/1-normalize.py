@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Implementing optimizations."""
-import numpy as np
 
 
 def normalize(X, m, s):
