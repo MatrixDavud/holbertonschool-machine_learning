@@ -12,7 +12,7 @@ def moving_average(data, beta):
         v = beta * v + (1 - beta) * x
 
         v_corrected = v / (1 - beta**t)
-        
+
         moving_averages.append(v_corrected)
 
     return moving_averages
