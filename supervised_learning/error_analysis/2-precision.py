@@ -8,6 +8,6 @@ def precision(confusion):
     m = confusion.shape[0]
     precision_classes = np.zeros(m)
     for i in range(m):
-        prec = confusion[i][i] / np.sum(confusion[:,i])
+        prec = confusion[i][i] / np.sum(confusion[:, i])
         precision_classes[i] = prec
     return precision_classes
