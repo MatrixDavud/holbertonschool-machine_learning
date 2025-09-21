@@ -5,7 +5,9 @@ import tensorflow as tf
 
 def l2_reg_cost(cost, model):
     """Calculate the cost of a neural network with L2 regularization."""
-    reg_loss = tf.add_n(model.losses)
-    total_cost = cost + reg_loss
+    reg_losses = model.losses
 
-    return total_cost
+    reg_losses_tensor = tf.stack(reg_losses)
+    total_costs = cost + reg_losses_tensor
+
+    return total_costs
