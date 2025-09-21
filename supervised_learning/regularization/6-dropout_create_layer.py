@@ -15,6 +15,6 @@ def dropout_create_layer(prev, n, activation, keep_prob, training=True):
 
     if training and keep_prob < 1.0:
         layer = tf.keras.layers.Dropout(rate=1 -
-                                         keep_prob)(layer, training=training)
+                                        keep_prob)(layer, training=training)
 
     return layer
