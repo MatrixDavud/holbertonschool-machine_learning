@@ -3,7 +3,7 @@
 import tensorflow as tf
 
 
-def dropout_create_layer(prev, n, activation, keep_prob,training=True):
+def dropout_create_layer(prev, n, activation, keep_prob, training=True):
     """Create a layer of a neural network using dropout."""
     layer = tf.keras.layers.Dense(
         units=n,
@@ -14,6 +14,7 @@ def dropout_create_layer(prev, n, activation, keep_prob,training=True):
     )(prev)
 
     if training and keep_prob < 1.0:
-        layer = tf.keras.layers.Dropout(rate=1 - keep_prob)(layer, training=training)
+        layer = tf.keras.layers.Dropout(rate=1 -
+                                         keep_prob)(layer, training=training)
 
     return layer
