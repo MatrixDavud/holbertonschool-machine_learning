@@ -5,13 +5,13 @@ import numpy as np
 
 def convolve_grayscale(images, kernel, padding='same', stride=(1, 1)):
     """Perform a convolution on grayscale images."""
-    m = images.shape[0]
+    m, h, w = images.shape
     kh, kw = kernel.shape
     sh, sw = stride
 
     if padding == 'same':
-        ph = int(np.ceil((kh - 1) / 2))
-        pw = int(np.ceil((kw - 1) / 2))
+        ph = ((h - 1) * sh + kh - h) // 2 + (((h - 1) * sh + kh - h) % 2)
+        pw = ((w - 1) * sw + kw - w) // 2 + (((w - 1) * sw + kw - w) % 2)
     elif padding == 'valid':
         ph, pw = 0, 0
     else:
