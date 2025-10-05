@@ -4,7 +4,7 @@ import numpy as np
 
 
 def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
-    """Perform forward propagation over a convolutional layer of a NN."""
+    """Perform back propagation over a convolutional layer of a NN."""
     m, h_prev, w_prev, c_prev = A_prev.shape
     kh, kw, _, c_new = W.shape
     sh, sw = stride

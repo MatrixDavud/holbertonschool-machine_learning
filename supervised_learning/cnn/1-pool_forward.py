@@ -4,7 +4,7 @@ import numpy as np
 
 
 def pool_forward(A_prev, kernel_shape, stride=(1, 1), mode='max'):
-    """Perform forward propagation over a convolutional layer of a NN."""
+    """Propogate forward over a pooling layer of a NN."""
     m, h_prev, w_prev, c_prev = A_prev.shape
     kh, kw = kernel_shape
     sh, sw = stride
