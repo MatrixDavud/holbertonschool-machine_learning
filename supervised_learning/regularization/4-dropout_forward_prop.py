@@ -29,3 +29,6 @@ def dropout_forward_prop(X, weights, L, keep_prob):
         cache['A' + str(i)] = A
 
     return cache
+
+# (3,4), np.random.rand(3,4)
+# # #
