@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Comment of Function"""
+"""Creating a Deep Convolutional Neural Network."""
 from tensorflow import keras as K
 
 

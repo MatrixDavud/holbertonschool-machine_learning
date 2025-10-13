@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Comment of Function"""
+"""Creating a Deep Convolutional Neural Network."""
 from tensorflow import keras as K
 identity_block = __import__('2-identity_block').identity_block
 projection_block = __import__('3-projection_block').projection_block

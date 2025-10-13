@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Comment of Function"""
+"""Creating a Deep Convolutional Neural Network."""
 from tensorflow import keras as K
 dense_block = __import__('5-dense_block').dense_block
 transition_layer = __import__('6-transition_layer').transition_layer
