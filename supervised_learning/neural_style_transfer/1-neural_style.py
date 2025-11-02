@@ -2,12 +2,10 @@
 """Neural Style Transfer Implementation."""
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.applications import VGG19
-from tensorflow.keras.models import Model
 
 
 class NST:
-    """Neural Style Transfer class"""
+    """Neural Style Transfer class."""
 
     style_layers = ['block1_conv1', 'block2_conv1', 'block3_conv1',
                     'block4_conv1', 'block5_conv1']
@@ -41,7 +39,7 @@ class NST:
     @staticmethod
     def scale_image(image):
         """
-        Rescale an image so pixels are in [0, 1] and max side is 512px
+        Rescale an image so pixels are in [0, 1] and max side is 512px.
 
         Args:
             image: numpy.ndarray with shape (h, w, 3)
@@ -84,11 +82,12 @@ class NST:
 
         Outputs the style layers followed by the content layer.
         """
-        vgg = VGG19(include_top=False, weights='imagenet')
+        vgg = tf.keras.applications.VGG19(include_top=False,
+                                          weights='imagenet')
         vgg.trainable = False
 
         outputs = [vgg.get_layer(name).output for name in self.style_layers]
         outputs.append(vgg.get_layer(self.content_layer).output)
 
-        self.model = Model(inputs=vgg.input, outputs=outputs)
+        self.model = tf.keras.models.Model(inputs=vgg.input, outputs=outputs)
         return self.model
