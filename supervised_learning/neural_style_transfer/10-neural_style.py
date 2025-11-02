@@ -3,6 +3,7 @@
 import numpy as np
 import tensorflow as tf
 
+
 class NST:
     """Neural Style Transfer class."""
 
@@ -13,7 +14,7 @@ class NST:
     content_layer = 'block5_conv2'
 
     def __init__(self, style_image, content_image,
-                alpha=1e4, beta=1, var=10):
+                 alpha=1e4, beta=1, var=10):
         """Initialize class object."""
         if (type(style_image) is not np.ndarray or
                 style_image.ndim != 3 or style_image.shape[2] != 3):
@@ -127,7 +128,7 @@ class NST:
                 .format(len(self.style_layers)))
         J_style = tf.add_n([
             self.layer_style_cost(style_outputs[i],
-                                self.gram_style_features[i])
+                                  self.gram_style_features[i])
             for i in range(len(style_outputs))
         ])
         J_style /= tf.cast(len(style_outputs), tf.float32)
@@ -143,7 +144,7 @@ class NST:
                 .format(self.content_feature.shape))
         _, nh, nw, nc = content_output.shape.dims
         return tf.reduce_sum(tf.square(content_output -
-                                    self.content_feature)) / \
+                                       self.content_feature)) / \
             tf.cast(nh * nw * nc, tf.float32)
 
     @staticmethod
@@ -190,7 +191,7 @@ class NST:
         return grads, J, J_content, J_style, J_var
 
     def generate_image(self, iterations=1000, step=None,
-                    lr=0.01, beta1=0.9, beta2=0.99):
+                       lr=0.01, beta1=0.9, beta2=0.99):
         """Generate the neural style transferred image."""
         if type(iterations) is not int:
             raise TypeError('iterations must be an integer')
