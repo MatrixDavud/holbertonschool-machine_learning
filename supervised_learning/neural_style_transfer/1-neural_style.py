@@ -3,9 +3,8 @@
 import numpy as np
 import tensorflow as tf
 
-
 class NST:
-    """Neural Style Transfer class."""
+    """Neural Style Transfer class"""
 
     style_layers = ['block1_conv1', 'block2_conv1', 'block3_conv1',
                     'block4_conv1', 'block5_conv1']
@@ -36,19 +35,12 @@ class NST:
         self.alpha = alpha
         self.beta = beta
 
+        # Load the model immediately
         self.model = self.load_model()
 
     @staticmethod
     def scale_image(image):
-        """
-        Rescale an image so pixels are in [0, 1] and max side is 512px.
-
-        Args:
-            image: numpy.ndarray with shape (h, w, 3)
-
-        Returns:
-            tf.Tensor with shape (1, h_new, w_new, 3)
-        """
+        """Rescale an image so pixels are in [0, 1] and max side is 512px."""
         if not isinstance(image, np.ndarray) or \
            image.ndim != 3 or image.shape[2] != 3:
             raise TypeError(
@@ -56,7 +48,6 @@ class NST:
             )
 
         h, w = image.shape[:2]
-
         if h > w:
             h_new = 512
             w_new = int(w * 512 / h)
@@ -69,23 +60,15 @@ class NST:
             size=[h_new, w_new],
             method=tf.image.ResizeMethod.BICUBIC
         )
-
-        image_rescaled = image_resized / 255.0
-
-        image_rescaled = tf.clip_by_value(image_rescaled, 0.0, 1.0)
-
-        image_final = tf.expand_dims(image_rescaled, axis=0)
-
-        return image_final
+        image_rescaled = tf.clip_by_value(image_resized / 255.0, 0.0, 1.0)
+        return tf.expand_dims(image_rescaled, axis=0)
 
     def load_model(self):
         """
-        Create the VGG19 model used to calculate content and style features.
-
+        Creates the VGG19 model used to calculate content and style features.
         Outputs the style layers followed by the content layer.
         """
-        vgg = tf.keras.applications.VGG19(include_top=False,
-                                          weights='imagenet')
+        vgg = tf.keras.applications.VGG19(include_top=False, weights='imagenet')
         vgg.trainable = False
 
         outputs = [vgg.get_layer(name).output for name in self.style_layers]
