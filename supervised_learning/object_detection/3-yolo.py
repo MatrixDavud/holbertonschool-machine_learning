@@ -94,7 +94,7 @@ class Yolo:
 
         for cls in unique_classes:
             idx = np.where(box_classes == cls)
-            
+
             cls_boxes = filtered_boxes[idx]
             cls_scores = box_scores[idx]
             cls_classes = box_classes[idx]
@@ -113,7 +113,7 @@ class Yolo:
                     break
 
                 ious = self._iou(cls_boxes[0], cls_boxes[1:])
-                
+
                 keep_idx = np.where(ious < self.nms_t)[0]
                 cls_boxes = cls_boxes[keep_idx + 1]
                 cls_scores = cls_scores[keep_idx + 1]
