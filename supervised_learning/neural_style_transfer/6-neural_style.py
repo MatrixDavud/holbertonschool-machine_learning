@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""performs tasks for neural style transfer"""
+"""Neural Style Transfer Implementation."""
 import numpy as np
 import tensorflow as tf
 
