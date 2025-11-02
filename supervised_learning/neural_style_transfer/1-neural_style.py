@@ -12,38 +12,27 @@ class NST:
     content_layer = 'block5_conv2'
 
     def __init__(self, style_image, content_image, alpha=1e4, beta=1):
-        """
-        Initialize NST class.
-        
-        Args:
-            style_image: numpy.ndarray with shape (h, w, 3) for s. reference
-            content_image: numpy.ndarray with shape (h, w, 3) for c. reference
-            alpha: weight for content cost
-            beta: weight for style cost
-        """
-        if not isinstance(style_image, np.ndarray) or \
-           style_image.ndim != 3 or style_image.shape[2] != 3:
+        """Initialize class object."""
+        valid = (isinstance(style_image, np.ndarray)
+                 and style_image.ndim == 3 and style_image.shape[2] == 3)
+        if not valid:
             raise TypeError(
-                "style_image must be a numpy.ndarray with shape (h, w, 3)"
-            )
-
-        if not isinstance(content_image, np.ndarray) or \
-           content_image.ndim != 3 or content_image.shape[2] != 3:
+                "style_image must be a numpy.ndarray with shape (h, w, 3)")
+        valid_img = (isinstance(content_image, np.ndarray)
+                     and content_image.ndim == 3
+                     and content_image.shape[2] == 3)
+        if not valid_img:
             raise TypeError(
-                "content_image must be a numpy.ndarray with shape (h, w, 3)"
-            )
-
+                "content_image must be a numpy.ndarray with shape (h, w, 3)")
         if not isinstance(alpha, (int, float)) or alpha < 0:
             raise TypeError("alpha must be a non-negative number")
-
         if not isinstance(beta, (int, float)) or beta < 0:
             raise TypeError("beta must be a non-negative number")
-
         self.style_image = self.scale_image(style_image)
         self.content_image = self.scale_image(content_image)
         self.alpha = alpha
         self.beta = beta
-        self.model = self.load_model()
+        self.load_model()
 
     @staticmethod
     def scale_image(image):
@@ -86,26 +75,22 @@ class NST:
         return image_final
 
     def load_model(self):
-        """
-        Create the model used to calculate cost based on VGG19.
-
-        Returns:
-            Keras model with VGG19 layers for style and content
-        """
-
+        """Create the model used to calculate cost."""
         vgg = tf.keras.applications.VGG19(
             include_top=False,
-            weights='imagenet'
+            weights='imagenet',
         )
-
         vgg.trainable = False
 
-        style_outputs = [vgg.get_layer(name).output 
-                        for name in self.style_layers]
+        for layer in vgg.layers:
+            if isinstance(layer, tf.keras.layers.MaxPooling2D):
+                layer.__class__ = tf.keras.layers.AveragePooling2D
+
+        style_outputs = [
+            vgg.get_layer(name).output for name in self.style_layers]
         content_output = vgg.get_layer(self.content_layer).output
 
-        model_outputs = style_outputs + [content_output]
-
-        model = tf.keras.Model(inputs=vgg.input, outputs=model_outputs)
-
-        return model
+        self.model = tf.keras.Model(
+            inputs=vgg.input,
+            outputs=[content_output] + style_outputs
+        )
