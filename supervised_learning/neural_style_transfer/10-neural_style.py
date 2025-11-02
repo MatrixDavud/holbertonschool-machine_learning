@@ -266,3 +266,18 @@ content {J_content.numpy()}, style {J_style.numpy()}")
 content {J_content.numpy()}, style {J_style.numpy()}")
         return best_image, best_cost.numpy()
 
+    @staticmethod
+    def variational_cost(generated_image):
+        """
+        calculate total cost for the generated image
+        """
+        if (not isinstance(generated_image, (tf.Tensor, tf.Variable))
+                or (len(generated_image.shape) != 4
+                    and len(generated_image.shape) != 3)):
+            raise TypeError('image must be a tensor of rank 3 or 4')
+
+        variational_loss = tf.image.total_variation(generated_image)
+
+        variational_loss = tf.squeeze(variational_loss)
+
+        return variational_loss
