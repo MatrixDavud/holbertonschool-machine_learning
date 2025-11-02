@@ -12,7 +12,15 @@ class NST:
     content_layer = 'block5_conv2'
 
     def __init__(self, style_image, content_image, alpha=1e4, beta=1):
-        """Initialize NST class."""
+        """
+        Initialize NST class.
+        
+        Args:
+            style_image: numpy.ndarray with shape (h, w, 3) for s. reference
+            content_image: numpy.ndarray with shape (h, w, 3) for c. reference
+            alpha: weight for content cost
+            beta: weight for style cost
+        """
         if not isinstance(style_image, np.ndarray) or \
            style_image.ndim != 3 or style_image.shape[2] != 3:
             raise TypeError(
@@ -35,7 +43,6 @@ class NST:
         self.content_image = self.scale_image(content_image)
         self.alpha = alpha
         self.beta = beta
-
         self.model = self.load_model()
 
     @staticmethod
@@ -80,15 +87,25 @@ class NST:
 
     def load_model(self):
         """
-        Create the VGG19 model used to calculate content and style features.
+        Create the model used to calculate cost based on VGG19.
 
-        Outputs the style layers followed by the content layer.
+        Returns:
+            Keras model with VGG19 layers for style and content
         """
-        vgg = tf.keras.applications.VGG19(include_top=False,
-                                          weights='imagenet')
+
+        vgg = tf.keras.applications.VGG19(
+            include_top=False,
+            weights='imagenet'
+        )
+
         vgg.trainable = False
 
-        outputs = [vgg.get_layer(name).output for name in self.style_layers]
-        outputs.append(vgg.get_layer(self.content_layer).output)
+        style_outputs = [vgg.get_layer(name).output 
+                        for name in self.style_layers]
+        content_output = vgg.get_layer(self.content_layer).output
 
-        return tf.keras.Model(inputs=vgg.input, outputs=outputs)
+        model_outputs = style_outputs + [content_output]
+
+        model = tf.keras.Model(inputs=vgg.input, outputs=model_outputs)
+
+        return model
