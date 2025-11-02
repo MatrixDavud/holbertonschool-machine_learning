@@ -33,6 +33,7 @@ class NST:
         self.alpha = alpha
         self.beta = beta
         self.load_model()
+        self.generate_features()
 
     @staticmethod
     def scale_image(image):
@@ -107,3 +108,14 @@ class NST:
         gram = tf.expand_dims(gram, axis=0)
         return gram / tf.cast(tf.shape(input_layer)[0], tf.float32)
 
+    def generate_features(self):
+        """Extract the features used to calculate neural style cost."""
+        content_image = tf.keras.applications.vgg19.preprocess_input(
+            self.content_image * 255)
+        style_image = tf.keras.applications.vgg19.preprocess_input(
+            self.style_image * 255)
+        style_outputs = self.model(style_image)
+        self.gram_style_features = [self.gram_matrix(style_feature)
+                                    for style_feature in style_outputs[:-1]]
+
+        self.content_feature = self.model(content_image)[-1]
