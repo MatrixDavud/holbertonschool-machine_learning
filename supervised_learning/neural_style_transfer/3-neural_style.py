@@ -28,18 +28,23 @@ class NST:
             raise TypeError("alpha must be a non-negative number")
         if not isinstance(beta, (int, float)) or beta < 0:
             raise TypeError("beta must be a non-negative number")
-
         self.style_image = self.scale_image(style_image)
         self.content_image = self.scale_image(content_image)
         self.alpha = alpha
         self.beta = beta
-
-        self.model = self.load_model()
-        self.generate_features()
+        self.load_model()
 
     @staticmethod
     def scale_image(image):
-        """Rescale image so pixels are in [0, 1] and max side is 512px."""
+        """
+        Rescale an image so pixels are in [0, 1] and max side is 512px.
+
+        Args:
+            image: numpy.ndarray with shape (h, w, 3)
+
+        Returns:
+            tf.Tensor with shape (1, h_new, w_new, 3)
+        """
         if not isinstance(image, np.ndarray) or \
            image.ndim != 3 or image.shape[2] != 3:
             raise TypeError(
@@ -47,6 +52,7 @@ class NST:
             )
 
         h, w = image.shape[:2]
+
         if h > w:
             h_new = 512
             w_new = int(w * 512 / h)
@@ -61,8 +67,11 @@ class NST:
         )
 
         image_rescaled = image_resized / 255.0
+
         image_rescaled = tf.clip_by_value(image_rescaled, 0.0, 1.0)
+
         image_final = tf.expand_dims(image_rescaled, axis=0)
+
         return image_final
 
     def load_model(self):
@@ -81,11 +90,10 @@ class NST:
             vgg.get_layer(name).output for name in self.style_layers]
         content_output = vgg.get_layer(self.content_layer).output
 
-        model = tf.keras.Model(
+        self.model = tf.keras.Model(
             inputs=vgg.input,
             outputs=[content_output] + style_outputs
         )
-        return model
 
     @staticmethod
     def gram_matrix(input_layer):
@@ -94,29 +102,8 @@ class NST:
             raise TypeError("input_layer must be a tensor of rank 4")
         if len(input_layer.shape) != 4:
             raise TypeError("input_layer must be a tensor of rank 4")
-
-        _, h, w, c = input_layer.shape
-        features = tf.reshape(input_layer, [-1, c])
-        gram = tf.matmul(features, features, transpose_a=True)
+        input_layer = tf.reshape(input_layer, [-1, input_layer.shape[-1]])
+        gram = tf.matmul(input_layer, input_layer, transpose_a=True)
         gram = tf.expand_dims(gram, axis=0)
-        gram = gram / tf.cast(h * w, tf.float32)
-        return gram
+        return gram / tf.cast(tf.shape(input_layer)[0], tf.float32)
 
-    def generate_features(self):
-        """Extract and stores style and content features for NST."""
-        preprocessed_style = tf.keras.applications.vgg19.preprocess_input(
-            self.style_image * 255.0)
-        preprocessed_content = tf.keras.applications.vgg19.preprocess_input(
-            self.content_image * 255.0)
-
-        outputs_style = self.model(preprocessed_style)
-        outputs_content = self.model(preprocessed_content)
-
-        content_feature = outputs_content[0]
-        style_features = outputs_style[1:]
-
-        gram_style_features = [self.gram_matrix(style_layer)
-                               for style_layer in style_features]
-
-        self.gram_style_features = gram_style_features
-        self.content_feature = content_feature
