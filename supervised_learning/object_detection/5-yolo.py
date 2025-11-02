@@ -186,4 +186,4 @@ class Yolo:
         pimages = np.array(pimages)
         image_shapes = np.array(image_shapes)
 
-        return pimages, image_shapes
+        return (pimages, image_shapes)
