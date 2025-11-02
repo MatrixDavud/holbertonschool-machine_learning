@@ -7,7 +7,7 @@ import tensorflow as tf
 class NST:
     """Neural Style Transfer class"""
 
-    style_layers = ['block1_conv1', 'block2_conv1', 'block3_conv1', 
+    style_layers = ['block1_conv1', 'block2_conv1', 'block3_conv1',
                     'block4_conv1', 'block5_conv1']
     content_layer = 'block5_conv2'
 
