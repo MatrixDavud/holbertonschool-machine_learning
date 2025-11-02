@@ -4,7 +4,6 @@ import numpy as np
 import tensorflow as tf
 
 
-
 class NST:
     """Neural Style Transfer class."""
 
