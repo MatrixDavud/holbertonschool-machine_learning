@@ -5,6 +5,7 @@ from tensorflow import keras as K
 import os
 import cv2
 
+
 class Yolo:
     """YOLO v3 object detection class."""
 
@@ -154,7 +155,7 @@ class Yolo:
 
         for filename in sorted(files):
             file_path = os.path.join(folder_path, filename)
-            
+
             if os.path.isfile(file_path):
                 image = cv2.imread(file_path)
 
