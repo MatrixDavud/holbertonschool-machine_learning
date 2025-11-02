@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Neural Style Transfer project by Mateo Quirós Asprón"""
+"""Neural Style Transfer Implementation."""
 import numpy as np
 import tensorflow as tf
 
@@ -188,9 +188,9 @@ of shape {content_shape}")
         if generated_image.shape != content_shape:
             raise TypeError(f"generated_image must be a tensor \
 of shape {content_shape}")
-        # Load the VGG19 model for preprocessing
+
         VGG19 = tf.keras.applications.vgg19
-        # Preprocessing fucntion expect the values in range [0, 255]
+
         generated_image = VGG19.preprocess_input(generated_image * 255)
         generated_features = self.model(generated_image)
         generated_style = generated_features[:-1]
@@ -257,7 +257,6 @@ content {J_content.numpy()}, style {J_style.numpy()}")
             optimizer.apply_gradients([(grads, generated_image)])
             generated_image.assign(tf.clip_by_value(generated_image, 0.0, 1.0))
 
-        # Final iteration
         grads, J, J_content, J_style = self.compute_grads(generated_image)
         if J < best_cost:
             best_cost = J
