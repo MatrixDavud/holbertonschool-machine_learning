@@ -83,3 +83,55 @@ class Yolo:
         box_scores = np.concatenate(box_scores, axis=0)
 
         return filtered_boxes, box_classes, box_scores
+
+    def non_max_suppression(self, filtered_boxes, box_classes, box_scores):
+        """Perform non-max suppression to remove overlapping boxes."""
+        box_predictions = []
+        predicted_box_classes = []
+        predicted_box_scores = []
+
+        for c in set(box_classes):
+            class_indices = np.where(box_classes == c)
+            class_boxes = filtered_boxes[class_indices]
+            class_box_scores = box_scores[class_indices]
+
+            sorted_indices = np.argsort(class_box_scores)[::-1]
+            class_boxes = class_boxes[sorted_indices]
+            class_box_scores = class_box_scores[sorted_indices]
+
+            keep = []
+
+            while len(class_boxes) > 0:
+                current_box = class_boxes[0]
+                keep.append(0)
+
+                x1 = np.maximum(current_box[0], class_boxes[1:, 0])
+                y1 = np.maximum(current_box[1], class_boxes[1:, 1])
+                x2 = np.minimum(current_box[2], class_boxes[1:, 2])
+                y2 = np.minimum(current_box[3], class_boxes[1:, 3])
+
+                inter_area = np.maximum(0, x2 - x1) * np.maximum(0, y2 - y1)
+                box1_area = (current_box[2] - current_box[0]) *\
+                    (current_box[3] - current_box[1])
+                box2_area = (class_boxes[1:, 2] - class_boxes[1:, 0]) *\
+                    (class_boxes[1:, 3] - class_boxes[1:, 1])
+
+                iou = inter_area / (box1_area + box2_area - inter_area)
+
+                keep_indices = np.where(iou <= self.nms_t)[0] + 1
+                class_boxes = class_boxes[keep_indices]
+                class_box_scores = class_box_scores[keep_indices]
+
+            keep_boxes = filtered_boxes[class_indices][sorted_indices[keep]]
+            keep_scores = box_scores[class_indices][sorted_indices[keep]]
+            keep_classes = np.full(len(keep_boxes), c)
+
+            box_predictions.append(keep_boxes)
+            predicted_box_scores.append(keep_scores)
+            predicted_box_classes.append(keep_classes)
+
+        box_predictions = np.concatenate(box_predictions, axis=0)
+        predicted_box_classes = np.concatenate(predicted_box_classes, axis=0)
+        predicted_box_scores = np.concatenate(predicted_box_scores, axis=0)
+
+        return box_predictions, predicted_box_classes, predicted_box_scores
