@@ -85,54 +85,60 @@ class Yolo:
         return filtered_boxes, box_classes, box_scores
 
     def non_max_suppression(self, filtered_boxes, box_classes, box_scores):
-        """Perform non-max suppression to remove overlapping boxes."""
+        """Apply Non-Maximum Suppression to filter overlapping boxes."""
         box_predictions = []
         predicted_box_classes = []
         predicted_box_scores = []
 
         unique_classes = np.unique(box_classes)
 
-        for c in unique_classes:
-            class_mask = np.where(box_classes == c)
-            class_boxes = filtered_boxes[class_mask]
-            class_box_scores = box_scores[class_mask]
+        for cls in unique_classes:
+            idx = np.where(box_classes == cls)
+            
+            cls_boxes = filtered_boxes[idx]
+            cls_scores = box_scores[idx]
+            cls_classes = box_classes[idx]
 
-            sorted_indices = np.argsort(class_box_scores)[::-1]
-            class_boxes = class_boxes[sorted_indices]
-            class_box_scores = class_box_scores[sorted_indices]
+            sort_idx = np.argsort(cls_scores)[::-1]
+            cls_boxes = cls_boxes[sort_idx]
+            cls_scores = cls_scores[sort_idx]
+            cls_classes = cls_classes[sort_idx]
 
-            keep_indices = []
+            while len(cls_boxes) > 0:
+                box_predictions.append(cls_boxes[0])
+                predicted_box_classes.append(cls_classes[0])
+                predicted_box_scores.append(cls_scores[0])
 
-            while len(class_boxes) > 0:
-                keep_indices.append(sorted_indices[0])
-
-                if len(class_boxes) == 1:
+                if len(cls_boxes) == 1:
                     break
 
-                box1 = class_boxes[0]
-                others = class_boxes[1:]
+                ious = self._iou(cls_boxes[0], cls_boxes[1:])
+                
+                keep_idx = np.where(ious < self.nms_t)[0]
+                cls_boxes = cls_boxes[keep_idx + 1]
+                cls_scores = cls_scores[keep_idx + 1]
+                cls_classes = cls_classes[keep_idx + 1]
 
-                x1 = np.maximum(box1[0], others[:, 0])
-                y1 = np.maximum(box1[1], others[:, 1])
-                x2 = np.minimum(box1[2], others[:, 2])
-                y2 = np.minimum(box1[3], others[:, 3])
-
-                inter_area = np.maximum(0, x2 - x1) * np.maximum(0, y2 - y1)
-                box1_area = (box1[2] - box1[0]) * (box1[3] - box1[1])
-                box2_area = (others[:, 2] - others[:, 0]) * (others[:, 3] - others[:, 1])
-                iou = inter_area / (box1_area + box2_area - inter_area)
-
-                remaining = np.where(iou <= self.nms_t)[0] + 1
-                class_boxes = class_boxes[remaining]
-                class_box_scores = class_box_scores[remaining]
-                sorted_indices = sorted_indices[remaining]
-
-            box_predictions.append(filtered_boxes[keep_indices])
-            predicted_box_classes.append(np.full(len(keep_indices), c))
-            predicted_box_scores.append(box_scores[keep_indices])
-
-        box_predictions = np.concatenate(box_predictions, axis=0)
-        predicted_box_classes = np.concatenate(predicted_box_classes, axis=0)
-        predicted_box_scores = np.concatenate(predicted_box_scores, axis=0)
+        box_predictions = np.array(box_predictions)
+        predicted_box_classes = np.array(predicted_box_classes)
+        predicted_box_scores = np.array(predicted_box_scores)
 
         return box_predictions, predicted_box_classes, predicted_box_scores
+
+    def _iou(self, box, boxes):
+        """Calculate Intersection over Union between one box and others."""
+        x1 = np.maximum(box[0], boxes[:, 0])
+        y1 = np.maximum(box[1], boxes[:, 1])
+        x2 = np.minimum(box[2], boxes[:, 2])
+        y2 = np.minimum(box[3], boxes[:, 3])
+
+        intersection = np.maximum(0, x2 - x1) * np.maximum(0, y2 - y1)
+
+        box_area = (box[2] - box[0]) * (box[3] - box[1])
+        boxes_area = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+
+        union = box_area + boxes_area - intersection
+
+        iou = intersection / union
+
+        return iou
