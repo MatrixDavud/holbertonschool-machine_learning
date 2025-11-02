@@ -28,13 +28,11 @@ class NST:
             raise TypeError("alpha must be a non-negative number")
         if not isinstance(beta, (int, float)) or beta < 0:
             raise TypeError("beta must be a non-negative number")
-
         self.style_image = self.scale_image(style_image)
         self.content_image = self.scale_image(content_image)
         self.alpha = alpha
         self.beta = beta
-
-        self.model = self.load_model()
+        self.load_model()
         self.generate_features()
 
     @staticmethod
@@ -104,19 +102,12 @@ class NST:
 
     def generate_features(self):
         """Extract and stores style and content features for NST."""
-        preprocessed_style = tf.keras.applications.vgg19.preprocess_input(
-            self.style_image * 255.0)
-        preprocessed_content = tf.keras.applications.vgg19.preprocess_input(
-            self.content_image * 255.0)
+        content_image = tf.keras.applications.vgg19.preprocess_input(
+            self.content_image * 255)
+        style_image = tf.keras.applications.vgg19.preprocess_input(
+            self.style_image * 255)
+        style_outputs = self.model(style_image)
+        self.gram_style_features = [self.gram_matrix(style_feature)
+                                    for style_feature in style_outputs[:-1]]
 
-        outputs_style = self.model(preprocessed_style)
-        outputs_content = self.model(preprocessed_content)
-
-        content_feature = outputs_content[0]
-        style_features = outputs_style[1:]
-
-        gram_style_features = [self.gram_matrix(style_layer)
-                               for style_layer in style_features]
-
-        self.gram_style_features = gram_style_features
-        self.content_feature = content_feature
+        self.content_feature = self.model(content_image)[-1]
