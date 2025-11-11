@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Poisson Distribution."""
+e = 2.7182818285
 
 
 class Poisson:
@@ -33,7 +34,6 @@ class Poisson:
 
     def pmf(self, k):
         """Calculate the value of the PMF for a given number of successes."""
-        e = 2.7182818285
         if k < 0:
             return 0
         else:
@@ -42,7 +42,6 @@ class Poisson:
 
     def cdf(self, k):
         """Calculate the value of the CDF for a given number of successes."""
-        e = 2.7182818285
         if k < 0:
             return 0
         else:
