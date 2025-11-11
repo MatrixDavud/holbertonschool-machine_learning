@@ -23,7 +23,7 @@ class Binomial:
             variance = 0
             for i in data:
                 variance += (i - mean)**2
-            variance = variance / len(data)
+            variance = variance / (len(data) - 1)
             p = 1 - variance / mean
             n = mean / p
             n = round(n)
