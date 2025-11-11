@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Exponential Distribution."""
+e = 2.7182818285
 
 
 class Exponential:
@@ -24,4 +25,4 @@ class Exponential:
         if x < 0:
             return 0
         else:
-            
+            return self.lambtha * e**(-self.lambtha * x)
