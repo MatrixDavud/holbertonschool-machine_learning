@@ -15,6 +15,6 @@ class Poisson:
         else:
             if type(data) is not list:
                 raise TypeError("data must be a list")
-            if type(data) is list and len(data) <= 1:
+            if len(data) <= 1:
                 raise ValueError("data must contain multiple values")
             self.lambtha = sum(data) / len(data)
