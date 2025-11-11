@@ -40,3 +40,11 @@ class Normal:
         factor = 1 / (self.stddev * (2*pi)**0.5)
         exponent = e ** (-0.5*(self.z_score(x))**2)
         return factor * exponent
+
+    @staticmethod
+    def error_function(x):
+        return (2/(pi)**0.5)*(x - x**3/3 + x**5/10 - x**7/42 + x**9/216)
+
+    def cdf(self, x):
+        """Calculate the value of the CDF for a given x-value."""
+        return 0.5*(1 + self.error_function(self.z_score(x)/(2**0.5)))
