@@ -30,3 +30,24 @@ class Binomial:
             p = mean / n
             self.n = n
             self.p = p
+
+    @staticmethod
+    def factorial(n):
+        """Calculates the factorial of n iteratively."""
+        if not isinstance(n, int) or n < 0:
+            raise ValueError("Input must be a non-negative integer.")
+        if n == 0:
+            return 1
+        result = 1
+        for i in range(1, n + 1):
+            result *= i
+        return result
+
+    def n_choose_k(self, n, k):
+        return self.factorial(n) / (self.factorial(k)*self.factorial(n-k))
+    
+    def pmf(self, k):
+        """Calculate the value of the PMF for a given number of successes."""
+        factor_1 = self.n_choose_k(self.n, k)
+        factor_2 = self.p**k * (1-self.p)**(self.n - k)
+        return factor_1 * factor_2
