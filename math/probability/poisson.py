@@ -18,3 +18,24 @@ class Poisson:
             if len(data) < 2:
                 raise ValueError("data must contain multiple values")
             self.lambtha = sum(data) / len(data)
+
+    @staticmethod
+    def factorial(n):
+        """Calculates the factorial of n iteratively."""
+        if not isinstance(n, int) or n < 0:
+            raise ValueError("Input must be a non-negative integer.")
+        if n == 0:
+            return 1
+        result = 1
+        for i in range(1, n + 1):
+            result *= i
+        return result
+
+    def pmf(self, k):
+        """Calculate the value of the PMF for a given number of successes."""
+        e = 2.7182818285
+        if k < 0:
+            return 0
+        else:
+            k = int(k)
+        return (e**-self.lambtha * self.lambtha**k)/self.factorial(k)
