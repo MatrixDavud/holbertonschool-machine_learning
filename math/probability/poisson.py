@@ -39,3 +39,15 @@ class Poisson:
         else:
             k = int(k)
         return (e**-self.lambtha * self.lambtha**k)/self.factorial(k)
+
+    def cdf(self, k):
+        """Calculate the value of the CDF for a given number of successes."""
+        e = 2.7182818285
+        if k < 0:
+            return 0
+        else:
+            k = int(k)
+        cdf_sum = 0
+        for i in range(k+1):
+            cdf_sum += (e**-self.lambtha * self.lambtha**i)/self.factorial(i)
+        return cdf_sum
