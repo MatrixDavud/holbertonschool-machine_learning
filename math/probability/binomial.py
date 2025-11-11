@@ -52,6 +52,18 @@ class Binomial:
         if k < 0 or k > self.n:
             return 0
         else:
-            factor_1 = self.n_choose_k(self.n, int(k))
-            factor_2 = self.p**int(k) * (1-self.p)**(self.n - int(k))
+            k = int(k)
+            factor_1 = self.n_choose_k(self.n, k)
+            factor_2 = self.p**k * (1-self.p)**(self.n - k)
             return factor_1 * factor_2
+
+    def cdf(self, k):
+        """Calculate the value of the CDF for a given number of successes."""
+        if k < 0 or k > self.n:
+            return 0
+        else:
+            k = int(k)
+            cdf = 0
+            for i in range(k+1):
+                cdf += self.pmf(i)
+            return cdf
