@@ -8,13 +8,12 @@ class Normal:
     """Normal distribution class."""
 
     def __init__(self, data=None, mean=0., stddev=1.):
-        """Initialize Normal Distribution object."""
+        """Initialize Normal distribution object."""
         if data is None:
             if stddev <= 0:
                 raise ValueError("stddev must be a positive value")
-            else:
-                self.mean = float(mean)
-                self.stddev = float(stddev)
+            self.mean = float(mean)
+            self.stddev = float(stddev)
         else:
             if type(data) is not list:
                 raise TypeError("data must be a list")
