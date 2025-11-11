@@ -48,6 +48,6 @@ class Binomial:
     
     def pmf(self, k):
         """Calculate the value of the PMF for a given number of successes."""
-        factor_1 = self.n_choose_k(self.n, k)
+        factor_1 = self.n_choose_k(self.n, int(k))
         factor_2 = self.p**k * (1-self.p)**(self.n - k)
         return factor_1 * factor_2
