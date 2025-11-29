@@ -4,40 +4,37 @@ import numpy as np
 
 
 def pca(X, var=0.95):
-    """Perform PCA on dataset X.
+    """
+    Performs PCA on dataset X and returns the weights matrix W.
 
-    Args:
-        X: numpy.ndarray of shape (n, d) where n is the number of data points
-           and d is the number of dimensions.
-        var: float, the fraction of variance to retain.
+    X: numpy.ndarray (n, d)
+       Data whose mean across each dimension is already 0.
+    var: float
+       Fraction of variance to retain.
 
     Returns:
-        X_reduced: numpy.ndarray of shape (n, k) where k is the number of
-                   dimensions after reduction.
+        W: numpy.ndarray of shape (d, nd)
+           PCA weights matrix
     """
-    # Center the data
-    X_centered = X - np.mean(X, axis=0)
 
     # Compute covariance matrix
-    covariance_matrix = np.cov(X_centered, rowvar=False)
+    cov = np.cov(X, rowvar=False)
 
     # Eigen decomposition
-    eigenvalues, eigenvectors = np.linalg.eigh(covariance_matrix)
+    eigvals, eigvecs = np.linalg.eigh(cov)
 
-    # Sort eigenvalues and eigenvectors in descending order
-    sorted_indices = np.argsort(eigenvalues)[::-1]
-    sorted_eigenvalues = eigenvalues[sorted_indices]
-    sorted_eigenvectors = eigenvectors[:, sorted_indices]
+    # Sort in descending order
+    idx = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[idx]
+    eigvecs = eigvecs[:, idx]
 
-    # Compute cumulative variance ratio
-    cumulative_variance = np.cumsum(sorted_eigenvalues)
-    total_variance = cumulative_variance[-1]
-    variance_ratio = cumulative_variance / total_variance
+    # Compute cumulative explained variance
+    cumvar = np.cumsum(eigvals) / np.sum(eigvals)
 
-    # Determine number of components to retain
-    k = np.searchsorted(variance_ratio, var) + 1
+    # Number of components required
+    k = np.searchsorted(cumvar, var) + 1
 
-    # Project data onto the top k eigenvectors
-    X_reduced = np.dot(X_centered, sorted_eigenvectors[:, :k])
+    # Return *weights matrix*, not projection
+    W = eigvecs[:, :k]
 
-    return X_reduced
+    return W
