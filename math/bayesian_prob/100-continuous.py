@@ -1,50 +1,50 @@
 #!/usr/bin/env python3
 """Implementing Bayesian Probability concepts."""
-import numpy as np
+from scipy import special
 
 
-def posterior(x, n, P, Pr):
+def posterior(x, n, p1, p2):
     """
-    Calculates the posterior probability for the
-    various hypothetical probabilities of developing severe side effects
-    given the data
+    Calculates the posterior probability that p (probability of severe
+    side effects) lies within the range [p1, p2], given x and n and a
+    uniform prior on p.
 
-    parameters:
-        x [int]: total number of patients that develop severe side effects
-        n [int]: total number of patients observed
-        P [1D numpy.ndarray]: containing the various hypothetical probabilities
-            of developing severe side effects
-        Pr [1D numpy.ndarray]: containing the prior beliefs of P
+    Parameters:
+        x (int): Number of observed severe side effects
+        n (int): Total number of patients observed
+        p1 (float): Lower bound of the interval
+        p2 (float): Upper bound of the interval
 
-    returns:
-        the posterior probability of each probability in P, given x and n
+    Returns:
+        float: Posterior probability that p ∈ [p1, p2]
     """
+
+    # --- Input validation ---
     if type(n) is not int or n <= 0:
         raise ValueError("n must be a positive integer")
+
     if type(x) is not int or x < 0:
-        raise ValueError(
-            "x must be an integer that is greater than or equal to 0")
+        raise ValueError("x must be an integer that is greater than or equal to 0")
+
     if x > n:
         raise ValueError("x cannot be greater than n")
-    if type(P) is not np.ndarray or len(P.shape) != 1:
-        raise TypeError("P must be a 1D numpy.ndarray")
-    if type(Pr) is not np.ndarray or Pr.shape != P.shape:
-        raise TypeError("Pr must be a numpy.ndarray with the same shape as P")
-    for value in range(P.shape[0]):
-        if P[value] > 1 or P[value] < 0:
-            raise ValueError("All values in P must be in the range [0, 1]")
-        if Pr[value] > 1 or Pr[value] < 0:
-            raise ValueError("All values in Pr must be in the range [0, 1]")
-    if np.isclose([np.sum(Pr)], [1]) == [False]:
-        raise ValueError("Pr must sum to 1")
-    # likelihood calculated as binomial distribution
-    factorial = np.math.factorial
-    fact_coefficient = factorial(n) / (factorial(n - x) * factorial(x))
-    likelihood = fact_coefficient * (P ** x) * ((1 - P) ** (n - x))
-    # intersection is the likelihood times priors
-    intersection = likelihood * Pr
-    # marginal probability is the sum over all probabilities of events
-    marginal = np.sum(intersection)
-    # posterior probability is the intersection divided by marginal probability
-    posterior = intersection / marginal
-    return posterior
+
+    if type(p1) is not float or not (0 <= p1 <= 1):
+        raise ValueError("p1 must be a float in the range [0, 1]")
+
+    if type(p2) is not float or not (0 <= p2 <= 1):
+        raise ValueError("p2 must be a float in the range [0, 1]")
+
+    if p2 <= p1:
+        raise ValueError("p2 must be greater than p1")
+
+    # --- Posterior is Beta(x+1, n-x+1) due to uniform prior ---
+    alpha = x + 1
+    beta = n - x + 1
+
+    # Beta cumulative distribution function: I_x(a, b)
+    cdf_p1 = special.betainc(alpha, beta, p1)
+    cdf_p2 = special.betainc(alpha, beta, p2)
+
+    # Posterior probability that p is in [p1, p2]
+    return cdf_p2 - cdf_p1
