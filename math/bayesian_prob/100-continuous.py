@@ -24,7 +24,9 @@ def posterior(x, n, p1, p2):
         raise ValueError("n must be a positive integer")
 
     if type(x) is not int or x < 0:
-        raise ValueError("x must be an integer that is greater than or equal to 0")
+        raise ValueError(
+            "x must be an integer that is greater than or equal to 0"
+                )
 
     if x > n:
         raise ValueError("x cannot be greater than n")
