@@ -5,36 +5,22 @@ import numpy as np
 
 def pca(X, var=0.95):
     """
-    Performs PCA on dataset X and returns the weights matrix W.
-
-    X: numpy.ndarray (n, d)
-       Data whose mean across each dimension is already 0.
-    var: float
-       Fraction of variance to retain.
-
-    Returns:
-        W: numpy.ndarray of shape (d, nd)
-           PCA weights matrix
+    Compute the PCA, to get var% of the var explain
+    :param X: The X to decompose
+    :param var: The var threshold
+    :return: THe W matrix
     """
+    U, S, Vt = np.linalg.svd(X)
 
-    # Compute covariance matrix
-    cov = np.cov(X, rowvar=False)
+    total_var_explain = 0
+    idx = 0
 
-    # Eigen decomposition
-    eigvals, eigvecs = np.linalg.eigh(cov)
+    normal_S = S / np.sum(S)
 
-    # Sort in descending order
-    idx = np.argsort(eigvals)[::-1]
-    eigvals = eigvals[idx]
-    eigvecs = eigvecs[:, idx]
+    for var_explain in normal_S:
+        total_var_explain += var_explain
+        idx += 1
+        if total_var_explain >= var:
+            break
 
-    # Compute cumulative explained variance
-    cumvar = np.cumsum(eigvals) / np.sum(eigvals)
-
-    # Number of components required
-    k = np.searchsorted(cumvar, var) + 1
-
-    # Return *weights matrix*, not projection
-    W = eigvecs[:, :k]
-
-    return W
+    return Vt.T[..., :idx]
