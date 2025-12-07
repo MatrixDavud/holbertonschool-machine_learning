@@ -22,11 +22,23 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
     kmeans = __import__('1-kmeans').kmeans
     variance = __import__('2-variance').variance
 
+    if not isinstance(X, np.ndarray) or X.ndim != 2:
+        return None, None
+    if not isinstance(kmin, int) or kmin <= 0:
+        return None, None
     if kmax is None:
-        kmax = X.shape[0]
-    if kmax - kmin < 1:
+        return None, None
+    if not isinstance(kmax, int) or kmax <= 0:
+        return None, None
+    if kmin > kmax:
+        return None, None
+    if kmax > X.shape[0]:
+        return None, None
+    if not isinstance(iterations, int) or iterations <= 0:
         return None, None
 
+    if kmax - kmin < 1:
+        return None, None
     results = []
     variances = []
 
