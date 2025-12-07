@@ -9,12 +9,12 @@ def initialize(X, k):
         X (numpy.ndarray): Dataset of shape (n, d).
         k (int): Number of clusters (positive integer).
         Returns: (pi, m, S), or (None, None, None) on failure.
-            - pi is a numpy.ndarray of shape (k,) containing the priors for 
+            - pi is a numpy.ndarray of shape (k,) containing the priors for
             each cluster, initialized evenly.
-            m is a numpy.ndarray of shape (k, d) containing the centroid 
+            m is a numpy.ndarray of shape (k, d) containing the centroid
             means for each cluster, initialized with K-means.
-            - S is a numpy.ndarray of shape (k, d, d) containing the 
-            covariance matrices for each cluster, initialized as identity 
+            - S is a numpy.ndarray of shape (k, d, d) containing the
+            covariance matrices for each cluster, initialized as identity
             matrices."""
     kmeans = __import__('1-kmeans').kmeans
 
