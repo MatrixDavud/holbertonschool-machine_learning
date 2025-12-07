@@ -27,9 +27,6 @@ def maximization(X, g):
     if n != n_g:
         return None, None, None
 
-    if not np.isclose(np.sum(g, axis=0), 1).all():
-        return None, None, None
-
     if np.any(g < 0) or np.any(g > 1):
         return None, None, None
 
