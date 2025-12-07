@@ -10,7 +10,7 @@ def expectation_maximization(X, k, iterations=1000, tol=1e-5, verbose=False):
         k (int): Number of clusters.
         iterations (int): Maximum number of iterations.
         tol (float): Tolerance to declare convergence.
-        verbose (bool): Whether to print information about the 
+        verbose (bool): Whether to print information about the
         algorithm.
         Returns: pi, m, S, g, l, or (None, None, None, None, None) on failure.
             - pi is a numpy.ndarray of shape (k,) containing the priors for
