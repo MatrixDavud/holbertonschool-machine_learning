@@ -22,7 +22,8 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
     kmeans = __import__('1-kmeans').kmeans
     variance = __import__('2-variance').variance
 
-
+    if kmax is None:
+        kmax = X.shape[0]
     if kmax - kmin < 1:
         return None, None
 
