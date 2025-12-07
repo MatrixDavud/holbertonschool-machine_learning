@@ -43,5 +43,4 @@ def maximization(X, g):
         m[i] = np.sum(np.matmul(g[i][np.newaxis, ...], X), axis=0) / gn
         S[i] = np.matmul(g[i][np.newaxis, ...] * (X - m[i]).T, (X - m[i])) / gn
 
-
     return pi, m, S
