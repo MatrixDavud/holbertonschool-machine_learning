@@ -16,33 +16,32 @@ def maximization(X, g):
             centroid means for each cluster.
             - S is a numpy.ndarray of shape (k, d, d) containing the
             updated covariance matrices for each cluster."""
-    if not isinstance(X, np.ndarray) or len(X.shape) != 2:
+    if not isinstance(X, np.ndarray) or X.ndim != 2:
         return None, None, None
-    if not isinstance(g, np.ndarray) or len(g.shape) != 2:
+    if not isinstance(g, np.ndarray) or g.ndim != 2:
         return None, None, None
 
     n, d = X.shape
-    k, n_g = g.shape
 
-    if n != n_g:
+    if g.shape[1] != n:
+        return None, None, None
+    k = g.shape[0]
+    if g.shape[0] != k:
         return None, None, None
 
-    if np.any(g < 0) or np.any(g > 1):
+    if not np.isclose(np.sum(g, axis=0), np.ones(n,)).all():
         return None, None, None
 
-    pi = np.sum(g, axis=1) / n
-
-    n_k = np.sum(g, axis=1, keepdims=True)
-    m = (g @ X) / n_k
-
+    pi = np.zeros((k,))
+    m = np.zeros((k, d))
     S = np.zeros((k, d, d))
 
-    for cluster in range(k):
+    for i in range(k):
 
-        X_centered = X - m[cluster]
+        gn = np.sum(g[i], axis=0)
+        pi[i] = gn / n
+        m[i] = np.sum(np.matmul(g[i][np.newaxis, ...], X), axis=0) / gn
+        S[i] = np.matmul(g[i][np.newaxis, ...] * (X - m[i]).T, (X - m[i])) / gn
 
-        weighted_X = X_centered * g[cluster, :, np.newaxis]
-
-        S[cluster] = (X_centered.T @ weighted_X) / n_k[cluster, 0]
 
     return pi, m, S
