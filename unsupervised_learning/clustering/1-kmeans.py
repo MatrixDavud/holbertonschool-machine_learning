@@ -4,20 +4,20 @@ import numpy as np
 
 
 def kmeans(X, k, iterations=1000):
-    """
-    Performs K-means on a dataset.
+    """Perform K-means on a dataset.
 
     Args:
-        X (numpy.ndarray): Dataset of shape (n, d)
-        k (int): Number of clusters
-        iterations (int): Maximum number of iterations
+        X (numpy.ndarray): Dataset of shape (n, d).
+        k (int): Number of clusters (positive integer).
+        iterations (int): Maximum number of iterations to perform.
 
     Returns:
-        C, clss or (None, None) on failure
-        C (numpy.ndarray): Centroids, shape (k, d)
-        clss (numpy.ndarray): Cluster index for each point, shape (n,)
+        tuple: (C, clss) where:
+            - C is numpy.ndarray of shape (k, d) with centroid means
+            - clss is numpy.ndarray of shape (n,) with cluster assignments
+        Returns (None, None) on failure.
     """
-    if not isinstance(X, np.ndarray) or X.ndim != 2:
+    if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None, None
     if not isinstance(k, int) or k <= 0:
         return None, None
@@ -26,25 +26,33 @@ def kmeans(X, k, iterations=1000):
 
     n, d = X.shape
 
+    if k > n:
+        return None, None
+
     min_vals = np.min(X, axis=0)
     max_vals = np.max(X, axis=0)
 
-    C = np.random.uniform(min_vals, max_vals, size=(k, d))
+    C = np.random.uniform(min_vals, max_vals, (k, d))
 
-    for _ in range(iterations):
-        distances = np.linalg.norm(X[:, None, :] - C[None, :, :], axis=2)
+    for i in range(iterations):
+        C_old = C.copy()
+
+        distances = np.linalg.norm(X[:, np.newaxis] - C, axis=2)
 
         clss = np.argmin(distances, axis=1)
 
-        old_C = C.copy()
+        for j in range(k):
+            cluster_points = X[clss == j]
 
-        for i in range(k):
-            points = X[clss == i]
-            if points.shape[0] == 0:
-                C[i] = np.random.uniform(min_vals, max_vals, size=(d,))
+            if len(cluster_points) == 0:
+                C[j] = np.random.uniform(min_vals, max_vals, (d,))
             else:
-                C[i] = np.mean(points, axis=0)
-        if np.allclose(C, old_C):
+                C[j] = np.mean(cluster_points, axis=0)
+
+        if np.allclose(C, C_old):
             break
+
+    distances = np.linalg.norm(X[:, np.newaxis] - C, axis=2)
+    clss = np.argmin(distances, axis=1)
 
     return C, clss
