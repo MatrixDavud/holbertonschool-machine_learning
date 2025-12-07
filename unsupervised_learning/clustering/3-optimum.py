@@ -23,7 +23,7 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
 
     if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None, None
-    
+
     n, d = X.shape
 
     if not isinstance(kmin, int) or kmin <= 0 or kmin >= n:
@@ -31,7 +31,7 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
 
     if kmax is None:
         kmax = n
-    
+
     if not isinstance(kmax, int) or kmax <= 0 or kmax > n:
         return None, None
 
@@ -56,7 +56,7 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
 
         if var is None:
             return None, None
-        
+
         variances.append(var)
 
     baseline_variance = variances[0]
