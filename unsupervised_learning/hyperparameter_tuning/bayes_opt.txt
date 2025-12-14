@@ -1,0 +1,10 @@
+{
+    "best_validation_accuracy": 0.9678999781608582,
+    "best_hyperparameters": {
+        "learning_rate": 0.01,
+        "units": 128,
+        "dropout": 0.5,
+        "l2_weight": 1e-06,
+        "batch_size": 64
+    }
+}
