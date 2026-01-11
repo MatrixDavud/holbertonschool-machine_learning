@@ -2,13 +2,13 @@
 """
 0-simple_gan.py
 
-This module defines the Simple_GAN class (a Keras Model) implementing a basic
-GAN training loop where the discriminator is trained several times per step,
-then the generator is trained once.
+This module defines the Simple_GAN class (a Keras Model) implementing a
+basic GAN training loop where the discriminator is trained several times
+per step, then the generator is trained once.
 
-The generator tries to produce fake samples that the discriminator scores as
-"real" (+1). The discriminator tries to score real samples as +1 and fake
-samples as -1, using a least-squares (MSE) objective.
+The generator tries to produce fake samples that the discriminator scores
+as "real" (+1). The discriminator tries to score real samples as +1 and
+fake samples as -1, using a least-squares (MSE) objective.
 """
 
 import tensorflow as tf
@@ -17,9 +17,9 @@ from tensorflow import keras
 
 class Simple_GAN(keras.Model):
     """
-    Simple_GAN(generator, discriminator, latent_generator, real_examples, ...)
+    Simple_GAN(generator, discriminator, latent_generator, real_examples)
 
-    A simple GAN model trained using the "least squares" objectives:
+    A simple GAN model trained using least-squares objectives:
 
     - Discriminator:
         minimize MSE(D(real), +1) + MSE(D(fake), -1)
@@ -28,25 +28,7 @@ class Simple_GAN(keras.Model):
         minimize MSE(D(G(z)), +1)
 
     Training step:
-      Run `disc_iter` discriminator updates, then 1 generator update.
-
-    Parameters
-    ----------
-    generator : tf.keras.Model
-        The generator network G(z).
-    discriminator : tf.keras.Model
-        The discriminator network D(x).
-    latent_generator : callable
-        A function that takes an integer k and returns a tensor of latent vectors
-        of shape (k, latent_dim).
-    real_examples : tf.Tensor
-        A dataset tensor containing real samples, shape (N, data_dim).
-    batch_size : int
-        Batch size for real/fake sampling.
-    disc_iter : int
-        Number of discriminator updates per train step.
-    learning_rate : float
-        Learning rate for Adam optimizers.
+        Run `disc_iter` discriminator updates, then one generator update.
     """
 
     def __init__(
@@ -59,8 +41,8 @@ class Simple_GAN(keras.Model):
         disc_iter=2,
         learning_rate=0.005,
     ):
-        """Initialize the Simple_GAN model and define losses/optimizers."""
-        super().__init__()  # initializes keras.Model internals (e.g., history)
+        """Initialize the Simple_GAN model and its optimizers."""
+        super().__init__()
         self.latent_generator = latent_generator
         self.real_examples = real_examples
         self.generator = generator
@@ -73,24 +55,41 @@ class Simple_GAN(keras.Model):
         self.beta_2 = 0.9
 
         # Generator objective: want D(G(z)) to be +1
-        self.generator.loss = (
-            lambda x: tf.keras.losses.MeanSquaredError()(x, tf.ones(x.shape))
+        self.generator.loss = lambda x: (
+            tf.keras.losses.MeanSquaredError()(
+                x,
+                tf.ones(x.shape),
+            )
         )
         self.generator.optimizer = keras.optimizers.Adam(
-            learning_rate=self.learning_rate, beta_1=self.beta_1, beta_2=self.beta_2
+            learning_rate=self.learning_rate,
+            beta_1=self.beta_1,
+            beta_2=self.beta_2,
         )
-        self.generator.compile(optimizer=self.generator.optimizer, loss=self.generator.loss)
+        self.generator.compile(
+            optimizer=self.generator.optimizer,
+            loss=self.generator.loss,
+        )
 
-        # Discriminator objective: want D(real)=+1 and D(fake)=-1
+        # Discriminator objective: D(real)=+1, D(fake)=-1
         self.discriminator.loss = lambda x, y: (
-            tf.keras.losses.MeanSquaredError()(x, tf.ones(x.shape))
-            + tf.keras.losses.MeanSquaredError()(y, -1 * tf.ones(y.shape))
+            tf.keras.losses.MeanSquaredError()(
+                x,
+                tf.ones(x.shape),
+            )
+            + tf.keras.losses.MeanSquaredError()(
+                y,
+                -1 * tf.ones(y.shape),
+            )
         )
         self.discriminator.optimizer = keras.optimizers.Adam(
-            learning_rate=self.learning_rate, beta_1=self.beta_1, beta_2=self.beta_2
+            learning_rate=self.learning_rate,
+            beta_1=self.beta_1,
+            beta_2=self.beta_2,
         )
         self.discriminator.compile(
-            optimizer=self.discriminator.optimizer, loss=self.discriminator.loss
+            optimizer=self.discriminator.optimizer,
+            loss=self.discriminator.loss,
         )
 
     def get_fake_sample(self, size=None, training=False):
@@ -100,86 +99,104 @@ class Simple_GAN(keras.Model):
         Parameters
         ----------
         size : int or None
-            Number of samples to generate. If None, uses self.batch_size.
+            Number of samples to generate.
         training : bool
-            Passed to the generator (affects layers like Dropout/BatchNorm).
+            Whether to run the generator in training mode.
 
         Returns
         -------
         tf.Tensor
-            Fake samples of shape (size, data_dim).
+            Fake samples.
         """
-        if not size:
+        if size is None:
             size = self.batch_size
         z = self.latent_generator(size)
         return self.generator(z, training=training)
 
     def get_real_sample(self, size=None):
         """
-        Sample a batch of real examples uniformly at random from self.real_examples.
+        Sample a batch of real examples uniformly at random.
 
         Parameters
         ----------
         size : int or None
-            Number of real samples to draw. If None, uses self.batch_size.
+            Number of real samples.
 
         Returns
         -------
         tf.Tensor
-            Real samples of shape (size, data_dim).
+            Real samples.
         """
-        if not size:
+        if size is None:
             size = self.batch_size
-        sorted_indices = tf.range(tf.shape(self.real_examples)[0])
-        random_indices = tf.random.shuffle(sorted_indices)[:size]
-        return tf.gather(self.real_examples, random_indices)
+        indices = tf.range(tf.shape(self.real_examples)[0])
+        indices = tf.random.shuffle(indices)[:size]
+        return tf.gather(self.real_examples, indices)
 
     def train_step(self, useless_argument):
         """
         Perform one GAN training step.
 
-        Keras calls this method repeatedly inside model.fit(). The argument is
-        unused here because we sample real data from self.real_examples and
-        fake data from the latent generator.
+        The argument is unused because samples are generated internally.
 
         Returns
         -------
         dict
-            Dictionary with keys "discr_loss" and "gen_loss" for Keras logging.
+            Dictionary with discriminator and generator losses.
         """
-        # 1) Update discriminator disc_iter times
+        # Train discriminator several times
         discr_loss = None
         for _ in range(self.disc_iter):
             with tf.GradientTape() as tape:
-                # Real batch
-                real_batch = self.get_real_sample(training=False) if False else self.get_real_sample()
-                # Fake batch (do NOT train generator while training discriminator)
+                real_batch = self.get_real_sample()
                 fake_batch = self.get_fake_sample(training=False)
 
-                # Discriminator outputs
-                d_real = self.discriminator(real_batch, training=True)
-                d_fake = self.discriminator(fake_batch, training=True)
+                d_real = self.discriminator(
+                    real_batch,
+                    training=True,
+                )
+                d_fake = self.discriminator(
+                    fake_batch,
+                    training=True,
+                )
 
-                # Discriminator loss: want d_real -> +1, d_fake -> -1
-                discr_loss = self.discriminator.loss(d_real, d_fake)
+                discr_loss = self.discriminator.loss(
+                    d_real,
+                    d_fake,
+                )
 
-            grads = tape.gradient(discr_loss, self.discriminator.trainable_variables)
+            grads = tape.gradient(
+                discr_loss,
+                self.discriminator.trainable_variables,
+            )
             self.discriminator.optimizer.apply_gradients(
-                zip(grads, self.discriminator.trainable_variables)
+                zip(
+                    grads,
+                    self.discriminator.trainable_variables,
+                )
             )
 
-        # 2) Update generator once
+        # Train generator once
         with tf.GradientTape() as tape:
-            # Fake batch, generator in training mode (so its params get gradients)
             fake_batch = self.get_fake_sample(training=True)
-
-            # Discriminator score of generated samples
-            d_fake = self.discriminator(fake_batch, training=False)
-
-            # Generator loss: want discriminator to output +1 on fake samples
+            d_fake = self.discriminator(
+                fake_batch,
+                training=False,
+            )
             gen_loss = self.generator.loss(d_fake)
 
-        grads = tape.gradient(gen_loss, self.generator.trainable_variables)
-        self.generator.optimizer.apply_gradients(zip(grads, self.generator.trainable_variables))
+        grads = tape.gradient(
+            gen_loss,
+            self.generator.trainable_variables,
+        )
+        self.generator.optimizer.apply_gradients(
+            zip(
+                grads,
+                self.generator.trainable_variables,
+            )
+        )
 
-        return {"discr_loss": discr_loss, "gen_loss": gen_loss}
+        return {
+            "discr_loss": discr_loss,
+            "gen_loss": gen_loss,
+        }
