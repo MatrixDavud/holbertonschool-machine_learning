@@ -29,18 +29,18 @@ class GRUCell:
         - Candidate hidden state (h_candidate): New memory content
         """
         # Update gate weights: combines input and previous hidden state
-        # Shape: (i + h, h) - concatenated input contributes to h units
-        self.Wz = np.random.randn(i + h, h)
+        # Shape: (h + i, h) - concatenated [h_prev, x_t]
+        self.Wz = np.random.randn(h + i, h)
         self.bz = np.zeros((1, h))
 
         # Reset gate weights: determines what to forget from prev state
-        # Shape: (i + h, h)
-        self.Wr = np.random.randn(i + h, h)
+        # Shape: (h + i, h)
+        self.Wr = np.random.randn(h + i, h)
         self.br = np.zeros((1, h))
 
         # Intermediate (candidate) hidden state weights
-        # Shape: (i + h, h)
-        self.Wh = np.random.randn(i + h, h)
+        # Shape: (h + i, h)
+        self.Wh = np.random.randn(h + i, h)
         self.bh = np.zeros((1, h))
 
         # Output weights: projects hidden state to output space
@@ -63,39 +63,39 @@ class GRUCell:
             y: The output of the cell of shape (m, o)
 
         GRU Forward Pass Theory:
-        1. Concatenate input x_t and previous hidden state h_prev
-        2. Update gate: z_t = sigmoid([x_t, h_prev] @ Wz + bz)
+        1. Concatenate previous hidden state and input [h_prev, x_t]
+        2. Update gate: z_t = sigmoid([h_prev, x_t] @ Wz + bz)
            - Decides how much to update the hidden state
-        3. Reset gate: r_t = sigmoid([x_t, h_prev] @ Wr + br)
+        3. Reset gate: r_t = sigmoid([h_prev, x_t] @ Wr + br)
            - Decides how much past information to forget
         4. Candidate hidden state:
-           h_candidate = tanh([x_t, r_t * h_prev] @ Wh + bh)
+           h_candidate = tanh([r_t * h_prev, x_t] @ Wh + bh)
            - Compute new candidate values for hidden state
         5. Final hidden state:
            h_next = z_t * h_prev + (1 - z_t) * h_candidate
            - Mix old and new hidden states based on update gate
         6. Output: y = softmax(h_next @ Wy + by)
         """
-        # Step 1: Concatenate input and previous hidden state
-        # Shape: (m, i) + (m, h) -> (m, i + h)
-        concat_xh = np.concatenate((h_prev, x_t), axis=1)
+        # Step 1: Concatenate previous hidden state and input
+        # Shape: (m, h) + (m, i) -> (m, h + i)
+        concat_hx = np.concatenate((h_prev, x_t), axis=1)
 
         # Step 2: Compute update gate (z_t)
         # Sigmoid squashes values to [0, 1]
         # z_t close to 1 means keep old state, close to 0 means update
-        z_t = self._sigmoid(np.matmul(concat_xh, self.Wz) + self.bz)
+        z_t = self._sigmoid(np.matmul(concat_hx, self.Wz) + self.bz)
 
         # Step 3: Compute reset gate (r_t)
         # Determines how much of previous hidden state to use when
         # computing candidate hidden state
-        r_t = self._sigmoid(np.matmul(concat_xh, self.Wr) + self.br)
+        r_t = self._sigmoid(np.matmul(concat_hx, self.Wr) + self.br)
 
         # Step 4: Compute candidate hidden state
         # Reset gate applied element-wise to previous hidden state
         # This allows the model to drop irrelevant information
-        concat_x_rh = np.concatenate((r_t * h_prev, x_t), axis=1)
+        concat_rhx = np.concatenate((r_t * h_prev, x_t), axis=1)
         h_candidate = np.tanh(
-            np.matmul(concat_x_rh, self.Wh) + self.bh
+            np.matmul(concat_rhx, self.Wh) + self.bh
         )
 
         # Step 5: Compute next hidden state
