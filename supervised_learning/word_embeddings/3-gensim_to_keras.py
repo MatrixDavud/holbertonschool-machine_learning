@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Comment of Function"""
+"""Extract Word2Vec"""
 import tensorflow as tf
 
 
