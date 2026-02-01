@@ -44,7 +44,7 @@ def bag_of_words(sentences, vocab=None):
         features = []
         for word in vocab:
             cleaned_words = [w for w in re.findall(r'\b\w+\b',
-                            word.lower()) if len(w) > 1 or w != 's']
+                             word.lower()) if len(w) > 1 or w != 's']
             if cleaned_words:
                 features.append(cleaned_words[0])
 
