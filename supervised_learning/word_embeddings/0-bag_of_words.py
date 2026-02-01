@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """
-Bag of Words embedding implementation.
+Module for creating bag of words embedding matrix.
 """
-
 import numpy as np
-import re
 
 
 def bag_of_words(sentences, vocab=None):
@@ -12,48 +10,47 @@ def bag_of_words(sentences, vocab=None):
     Creates a bag of words embedding matrix.
 
     Args:
-        sentences (list): List of sentences to analyze.
-        vocab (list, optional): Vocabulary words to use.
-            If None, vocabulary is built from sentences.
+        sentences: A list of sentences to analyze
+        vocab: A list of the vocabulary words to use for the analysis
+               If None, all words within sentences should be used
 
     Returns:
-        tuple: (embeddings, features)
-            embeddings is a numpy.ndarray of shape (s, f)
-            features is a numpy.ndarray of vocabulary words
+        embeddings: A numpy.ndarray of shape (s, f) containing the
+                    embeddings where s is the number of sentences in
+                    sentences and f is the number of features analyzed
+        features: A list of the features used for embeddings
     """
-    if not isinstance(sentences, list):
-        raise TypeError("sentences must be a list")
-
-    tokenized = []
+    # Tokenize all sentences
+    tokenized_sentences = []
     for sentence in sentences:
-        if not isinstance(sentence, str):
-            raise TypeError("each sentence must be a string")
+        # Convert to lowercase and split into words
+        words = sentence.lower().split()
+        tokenized_sentences.append(words)
 
-        clean = sentence.lower()
-        clean = re.sub(r"[^\w\s]", "", clean)
-        tokens = clean.split()
-        tokenized.append(tokens)
-
+    # Build vocabulary if not provided
     if vocab is None:
+        # Collect all unique words from sentences
         vocab_set = set()
-        for tokens in tokenized:
-            vocab_set.update(tokens)
-        features = np.array(sorted(vocab_set))
+        for words in tokenized_sentences:
+            vocab_set.update(words)
+        # Sort vocabulary for consistent ordering
+        features = sorted(list(vocab_set))
     else:
-        features = np.array(vocab)
+        # Use provided vocabulary (convert to lowercase)
+        features = [word.lower() for word in vocab]
 
+    # Create word to index mapping
+    word_to_idx = {word: idx for idx, word in enumerate(features)}
+
+    # Initialize embeddings matrix
     s = len(sentences)
     f = len(features)
-
     embeddings = np.zeros((s, f), dtype=int)
 
-    word_to_index = {}
-    for idx, word in enumerate(features):
-        word_to_index[word] = idx
-
-    for i, tokens in enumerate(tokenized):
-        for word in tokens:
-            if word in word_to_index:
-                embeddings[i, word_to_index[word]] += 1
+    # Fill embeddings matrix with word counts
+    for i, words in enumerate(tokenized_sentences):
+        for word in words:
+            if word in word_to_idx:
+                embeddings[i, word_to_idx[word]] += 1
 
     return embeddings, features
