@@ -4,6 +4,7 @@ Bag of Words embedding implementation.
 """
 
 import numpy as np
+import re
 
 
 def bag_of_words(sentences, vocab=None):
@@ -18,7 +19,7 @@ def bag_of_words(sentences, vocab=None):
     Returns:
         tuple: (embeddings, features)
             embeddings is a numpy.ndarray of shape (s, f)
-            features is a list of vocabulary words
+            features is a numpy.ndarray of vocabulary words
     """
     if not isinstance(sentences, list):
         raise TypeError("sentences must be a list")
@@ -27,16 +28,19 @@ def bag_of_words(sentences, vocab=None):
     for sentence in sentences:
         if not isinstance(sentence, str):
             raise TypeError("each sentence must be a string")
-        tokens = sentence.lower().split()
+
+        clean = sentence.lower()
+        clean = re.sub(r"[^\w\s]", "", clean)
+        tokens = clean.split()
         tokenized.append(tokens)
 
     if vocab is None:
         vocab_set = set()
         for tokens in tokenized:
             vocab_set.update(tokens)
-        features = sorted(vocab_set)
+        features = np.array(sorted(vocab_set))
     else:
-        features = list(vocab)
+        features = np.array(vocab)
 
     s = len(sentences)
     f = len(features)
@@ -50,7 +54,6 @@ def bag_of_words(sentences, vocab=None):
     for i, tokens in enumerate(tokenized):
         for word in tokens:
             if word in word_to_index:
-                j = word_to_index[word]
-                embeddings[i, j] += 1
+                embeddings[i, word_to_index[word]] += 1
 
     return embeddings, features
