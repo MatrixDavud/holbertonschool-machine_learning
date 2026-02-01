@@ -42,7 +42,8 @@ def ngram_bleu(references, sentence, n):
         ref_ngrams = Counter(make_ngrams(ref, n))
         for ng in cand_counts:
             if ng in ref_ngrams:
-                max_ref_counts[ng] = max(max_ref_counts.get(ng, 0), ref_ngrams[ng])
+                max_ref_counts[ng] = max(max_ref_counts.get(ng, 0),
+                                         ref_ngrams[ng])
             else:
                 max_ref_counts[ng] = max_ref_counts.get(ng, 0)
 
