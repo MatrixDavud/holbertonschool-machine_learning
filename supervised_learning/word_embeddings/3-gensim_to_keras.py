@@ -1,40 +1,27 @@
 #!/usr/bin/env python3
 """
-Module that converts a gensim Word2Vec model to a Keras Embedding layer.
-
-This module provides the function gensim_to_keras
-which extracts the weight matrix from a
-trained gensim Word2Vec model and creates a Keras Embedding
-layer initialized with these weights.
-The embedding layer is trainable.
+    A function that converts a gensim word2vec model to a keras Embedding layer
 """
 import tensorflow as tf
 
 
 def gensim_to_keras(model):
     """
-    Converts a gensim Word2Vec model to a Keras Embedding layer.
+        Converts a gensim word2vec model to a keras Embedding layer.
 
-    The function extracts the word vectors from t
-    he gensim model (using model.wv.vectors)
-    and creates a Keras Embedding layer using these
-    weights. The embedding layer is trainable,
-    so the weights can be further updated during training.
+        Args:
+            model (gensim.models.Word2Vec): a trained gensim word2vec models.
 
-    Args:
-        model: A trained gensim Word2Vec model.
-
-    Returns:
-        tensorflow.keras.layers.Embedding: A trainable
-        Keras Embedding layer initialized with
-        the gensim model's weights.
+        Returns:
+            The trainable keras Embedding.
     """
-    _ = model.wv.index_to_key
+    vocab_size = len(model.wv)
+    vector_size = model.vector_size
     weights = model.wv.vectors
-    vocab_size, embedding_dim = weights.shape
 
-    keras_embedding = tf.keras.layers.Embedding(input_dim=vocab_size,
-                                output_dim=embedding_dim,
-                                weights=[weights],
-                                trainable=True)
-    return keras_embedding
+    embedding_layer = tf.keras.layers.Embedding(input_dim=vocab_size,
+                                                output_dim=vector_size,
+                                                weights=[weights],
+                                                trainable=True)
+
+    return embedding_layer
