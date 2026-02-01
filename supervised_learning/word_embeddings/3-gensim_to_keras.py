@@ -2,7 +2,7 @@
 """
 Defines function that converts gensim word2vec model to Keras Embedding layer
 """
-import tensrowflow as tf
+import tensorflow as tf
 
 def gensim_to_keras(model):
     """
