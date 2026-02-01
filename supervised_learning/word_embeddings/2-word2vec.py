@@ -1,55 +1,34 @@
 #!/usr/bin/env python3
 """
-Module for creating and training a word2vec model using gensim.
+Module to convert a gensim Word2Vec
+model to a Keras Embedding layer
 """
-import gensim
+import tensorflow as tf
 
 
-def word2vec_model(sentences, vector_size=100, min_count=5, window=5,
-                   negative=5, cbow=True, epochs=5, seed=0, workers=1):
+def gensim_to_keras(model):
     """
-    Creates, builds and trains a gensim word2vec model.
+    Converts a gensim word2vec model to a keras Embedding layer.
 
     Args:
-        sentences: A list of sentences to be trained on
-        vector_size: The dimensionality of the embedding layer
-        min_count: The minimum number of occurrences of a word for use
-                   in training
-        window: The maximum distance between the current and predicted
-                word within a sentence
-        negative: The size of negative sampling
-        cbow: A boolean to determine the training type; True is for CBOW;
-              False is for Skip-gram
-        epochs: The number of iterations to train over
-        seed: The seed for the random number generator
-        workers: The number of worker threads to train the model
+        model: A trained gensim word2vec model
 
     Returns:
-        The trained word2vec model
+        The trainable keras Embedding layer
     """
-    # Determine the training algorithm
-    # sg=0 for CBOW, sg=1 for Skip-gram
-    sg = 0 if cbow else 1
+    # Access the KeyedVectors object
+    # which holds the learned vectors
+    embedding_matrix = model.wv.vectors
 
-    # Create and build the Word2Vec model
-    model = gensim.models.Word2Vec(
-        vector_size=vector_size,
-        min_count=min_count,
-        window=window,
-        negative=negative,
-        sg=sg,
-        seed=seed,
-        workers=workers
-    )
-    
-    # Build vocabulary from sentences
-    model.build_vocab(sentences)
-    
-    # Train the model
-    model.train(
-        sentences,
-        total_examples=model.corpus_count,
-        epochs=epochs
+    # Get the raw numpy array of embeddings
+    # (shape: vocab_size x vector_size)
+    vocab_size, embedding_dim = embedding_matrix.shape
+
+    layer = tf.keras.layers.Embedding(
+        input_dim=vocab_size,
+        output_dim=embedding_dim,
+        weights=[embedding_matrix],
+        trainable=True
     )
 
-    return model
+    return layer
