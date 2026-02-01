@@ -16,12 +16,9 @@ def gensim_to_keras(model):
     Returns:
         The trainable keras Embedding layer
     """
-    # Access the KeyedVectors object
-    # which holds the learned vectors
-    embedding_matrix = model.wv.vectors
+    # Copy embeddings to avoid modifying gensim weights
+    embedding_matrix = model.wv.vectors.copy()
 
-    # Get the raw numpy array of embeddings
-    # (shape: vocab_size x vector_size)
     vocab_size, embedding_dim = embedding_matrix.shape
 
     layer = tf.keras.layers.Embedding(
