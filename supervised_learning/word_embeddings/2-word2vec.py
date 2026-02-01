@@ -1,71 +1,47 @@
 #!/usr/bin/env python3
 """
-Word2Vec model training using gensim.
+Module for creating and training a word2vec model using gensim.
 """
+from gensim.models import Word2Vec
 
-import gensim
 
-
-def word2vec_model(
-    sentences,
-    vector_size=100,
-    min_count=5,
-    window=5,
-    negative=5,
-    cbow=True,
-    epochs=5,
-    seed=0,
-    workers=1
-):
+def word2vec_model(sentences, vector_size=100, min_count=5, window=5,
+                   negative=5, cbow=True, epochs=5, seed=0, workers=1):
     """
-    Creates, builds, and trains a Word2Vec model.
+    Creates, builds and trains a gensim word2vec model.
 
     Args:
-        sentences (list): List of sentences to train on.
-        vector_size (int): Dimensionality of word vectors.
-        min_count (int): Minimum word frequency.
-        window (int): Maximum distance between words.
-        negative (int): Number of negative samples.
-        cbow (bool): True for CBOW, False for Skip-gram.
-        epochs (int): Number of training epochs.
-        seed (int): Random seed.
-        workers (int): Number of worker threads.
+        sentences: A list of sentences to be trained on
+        vector_size: The dimensionality of the embedding layer
+        min_count: The minimum number of occurrences of a word for use
+                   in training
+        window: The maximum distance between the current and predicted
+                word within a sentence
+        negative: The size of negative sampling
+        cbow: A boolean to determine the training type; True is for CBOW;
+              False is for Skip-gram
+        epochs: The number of iterations to train over
+        seed: The seed for the random number generator
+        workers: The number of worker threads to train the model
 
     Returns:
-        gensim.models.Word2Vec: Trained Word2Vec model.
+        The trained word2vec model
     """
-    if not isinstance(sentences, list):
-        raise TypeError("sentences must be a list")
+    # Determine the training algorithm
+    # sg=0 for CBOW, sg=1 for Skip-gram
+    sg = 0 if cbow else 1
 
-    tokenized = []
-    for sentence in sentences:
-        if not isinstance(sentence, str):
-            raise TypeError("each sentence must be a string")
-
-        clean = sentence.lower()
-        clean = "".join(
-            char if char.isalnum() or char.isspace() else " "
-            for char in clean
-        )
-        tokens = clean.split()
-        tokenized.append(tokens)
-
-    model = gensim.models.Word2Vec(
+    # Create the Word2Vec model
+    model = Word2Vec(
+        sentences=sentences,
         vector_size=vector_size,
-        window=window,
         min_count=min_count,
-        sg=0 if cbow else 1,
+        window=window,
         negative=negative,
+        sg=sg,
+        epochs=epochs,
         seed=seed,
-        workers=1
-    )
-
-    model.build_vocab(tokenized)
-
-    model.train(
-        tokenized,
-        total_examples=model.corpus_count,
-        epochs=epochs
+        workers=workers
     )
 
     return model
