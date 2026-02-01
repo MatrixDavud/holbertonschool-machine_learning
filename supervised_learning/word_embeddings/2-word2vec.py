@@ -3,8 +3,7 @@
 Word2Vec model training using gensim.
 """
 
-import re
-from gensim.models import Word2Vec
+import gensim
 
 
 def word2vec_model(
@@ -33,7 +32,7 @@ def word2vec_model(
         workers (int): Number of worker threads.
 
     Returns:
-        Word2Vec: Trained Word2Vec model.
+        gensim.models.Word2Vec: Trained Word2Vec model.
     """
     if not isinstance(sentences, list):
         raise TypeError("sentences must be a list")
@@ -44,24 +43,28 @@ def word2vec_model(
             raise TypeError("each sentence must be a string")
 
         clean = sentence.lower()
-        clean = re.sub(r"[^\w\s]", "", clean)
+        clean = "".join(
+            char if char.isalnum() or char.isspace() else " "
+            for char in clean
+        )
         tokens = clean.split()
         tokenized.append(tokens)
 
-    model = Word2Vec(
-        sentences=tokenized,
+    model = gensim.models.Word2Vec(
         vector_size=vector_size,
         window=window,
         min_count=min_count,
         sg=0 if cbow else 1,
         negative=negative,
         seed=seed,
-        workers=workers
+        workers=1
     )
+
+    model.build_vocab(tokenized)
 
     model.train(
         tokenized,
-        total_examples=len(tokenized),
+        total_examples=model.corpus_count,
         epochs=epochs
     )
 
