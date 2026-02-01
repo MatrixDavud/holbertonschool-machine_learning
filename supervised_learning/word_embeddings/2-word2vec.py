@@ -1,34 +1,49 @@
 #!/usr/bin/env python3
 """
-Module to convert a gensim Word2Vec
-model to a Keras Embedding layer
+Word2Vec model training
 """
-import tensorflow as tf
+import gensim
 
 
-def gensim_to_keras(model):
+def word2vec_model(sentences, vector_size=100, min_count=5, window=5,
+                   negative=5, cbow=True, epochs=5, seed=1, workers=1):
     """
-    Converts a gensim word2vec model to a keras Embedding layer.
+    Creates, builds, and trains a Word2Vec model.
 
-    Args:
-        model: A trained gensim word2vec model
+    :Parameters:
+    - sentences: list of tokenized sentences to be trained on
+    - vector_size: dimensionality of the embedding layer
+    - min_count: minimum number of occurrences of a word for use in training
+    - window: maximum distance between the current and predicted word within
+    a sentence
+    - negative: size of negative sampling
+    - cbow: boolean to determine training type; True is for CBOW, False for
+    Skip-gram
+    - epochs: number of iterations (epochs) to train over
+    - seed: seed for the random number generator
+    - workers: number of worker threads to train the model
 
     Returns:
-        The trainable keras Embedding layer
+    - The trained Word2Vec model
     """
-    # Access the KeyedVectors object
-    # which holds the learned vectors
-    embedding_matrix = model.wv.vectors
+    if cbow:
+        sg = 0
+    else:
+        sg = 1
 
-    # Get the raw numpy array of embeddings
-    # (shape: vocab_size x vector_size)
-    vocab_size, embedding_dim = embedding_matrix.shape
-
-    layer = tf.keras.layers.Embedding(
-        input_dim=vocab_size,
-        output_dim=embedding_dim,
-        weights=[embedding_matrix],
-        trainable=True
+    model = gensim.models.Word2Vec(
+        sentences=sentences,
+        vector_size=vector_size,
+        min_count=min_count,
+        window=window,
+        negative=negative,
+        sg=sg,
+        seed=seed,
+        epochs=epochs,
+        workers=workers
     )
-
-    return layer
+    # Prepare the model's vocabulary and train it
+    model.build_vocab(sentences)
+    model.train(sentences, total_examples=model.corpus_count,
+                epochs=model.epochs)
+    return model
