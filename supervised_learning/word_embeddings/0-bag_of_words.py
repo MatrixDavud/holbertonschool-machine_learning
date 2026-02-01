@@ -20,11 +20,15 @@ def bag_of_words(sentences, vocab=None):
                     sentences and f is the number of features analyzed
         features: A list of the features used for embeddings
     """
+    import re
+
     # Tokenize all sentences
     tokenized_sentences = []
     for sentence in sentences:
-        # Convert to lowercase and split into words
-        words = sentence.lower().split()
+        # Convert to lowercase, extract only alphanumeric words
+        # Filter out single character 's' from possessives
+        words = [w for w in re.findall(r'\b\w+\b', sentence.lower())
+                 if len(w) > 1 or w != 's']
         tokenized_sentences.append(words)
 
     # Build vocabulary if not provided
@@ -36,8 +40,13 @@ def bag_of_words(sentences, vocab=None):
         # Sort vocabulary for consistent ordering
         features = sorted(list(vocab_set))
     else:
-        # Use provided vocabulary (convert to lowercase)
-        features = [word.lower() for word in vocab]
+        # Use provided vocabulary (convert to lowercase and clean)
+        features = []
+        for word in vocab:
+            cleaned_words = [w for w in re.findall(r'\b\w+\b',
+                            word.lower()) if len(w) > 1 or w != 's']
+            if cleaned_words:
+                features.append(cleaned_words[0])
 
     # Create word to index mapping
     word_to_idx = {word: idx for idx, word in enumerate(features)}
