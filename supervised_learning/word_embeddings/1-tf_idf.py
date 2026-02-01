@@ -65,17 +65,14 @@ def tf_idf(sentences, vocab=None):
     f = len(features)
     tf_matrix = np.zeros((s, f))
 
-    # Calculate Term Frequency (TF)
+    # Calculate Term Frequency (TF) - using raw counts
     for i, words in enumerate(tokenized_sentences):
-        doc_length = len(words)
-        if doc_length > 0:
-            for word in words:
-                if word in word_to_idx:
-                    tf_matrix[i, word_to_idx[word]] += 1
-            # Normalize by document length to get TF
-            tf_matrix[i] = tf_matrix[i] / doc_length
+        for word in words:
+            if word in word_to_idx:
+                tf_matrix[i, word_to_idx[word]] += 1
 
     # Calculate Inverse Document Frequency (IDF)
+    # Using smooth IDF: log((1 + n) / (1 + df)) + 1
     idf_vector = np.zeros(f)
     for j, feature in enumerate(features):
         # Count how many documents contain this feature
@@ -83,13 +80,16 @@ def tf_idf(sentences, vocab=None):
         for words in tokenized_sentences:
             if feature in words:
                 doc_count += 1
-        # Calculate IDF
-        if doc_count > 0:
-            idf_vector[j] = np.log(s / doc_count)
-        else:
-            idf_vector[j] = 0
+        # Calculate IDF with smoothing
+        idf_vector[j] = np.log((1 + s) / (1 + doc_count)) + 1
 
     # Calculate TF-IDF by multiplying TF with IDF
     embeddings = tf_matrix * idf_vector
+
+    # Normalize each document vector (L2 normalization)
+    for i in range(s):
+        norm = np.linalg.norm(embeddings[i])
+        if norm > 0:
+            embeddings[i] = embeddings[i] / norm
 
     return embeddings, np.array(features)
