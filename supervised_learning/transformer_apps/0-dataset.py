@@ -45,35 +45,11 @@ class Dataset:
             tokenizer_en: English tokenizer
         """
         # Load pre-trained tokenizers
-        tokenizer_pt = transformers.AutoTokenizer.from_pretrained(
+        tokenizer_pt = transformers.BertTokenizerFast.from_pretrained(
             'neuralmind/bert-base-portuguese-cased'
         )
-        tokenizer_en = transformers.AutoTokenizer.from_pretrained(
+        tokenizer_en = transformers.BertTokenizerFast.from_pretrained(
             'bert-base-uncased'
-        )
-
-        # Create generator functions for efficient iteration
-        def pt_iterator():
-            for pt, en in data:
-                yield pt.numpy().decode('utf-8')
-
-        def en_iterator():
-            for pt, en in data:
-                yield en.numpy().decode('utf-8')
-
-        # Train tokenizers with vocabulary size of 2**13 = 8192
-        vocab_size = 2**13
-
-        # Train Portuguese tokenizer
-        tokenizer_pt = tokenizer_pt.train_new_from_iterator(
-            pt_iterator(),
-            vocab_size=vocab_size
-        )
-
-        # Train English tokenizer
-        tokenizer_en = tokenizer_en.train_new_from_iterator(
-            en_iterator(),
-            vocab_size=vocab_size
         )
 
         return tokenizer_pt, tokenizer_en
