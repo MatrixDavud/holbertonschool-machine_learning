@@ -1,48 +1,90 @@
 #!/usr/bin/env python3
-"""Class dataset, loading dataset for machine translation"""
-
-
-import transformers
+""" task 0/1 """
 import tensorflow_datasets as tfds
+import transformers
 
 
 class Dataset:
-    """loading dataset for machine translation"""
+    """
+    class for machine translation task using the TED talk
+    portuguese to English dataset
+    """
+
     def __init__(self):
-        """class constructor for dataset class"""
-        self.data_train = tfds.load(
+        """
+        initialize the dataset with training and validation splits and
+        tokenizers
+        """
+        # load portuguese to english dataset
+        self.data_train, self.data_valid = tfds.load(
             'ted_hrlr_translate/pt_to_en',
-            split='train',
+            split=['train', 'validation'],
             as_supervised=True
         )
-        self.data_valid = tfds.load(
-            'ted_hrlr_translate/pt_to_en',
-            split='validation',
-            as_supervised=True
-        )
+
+        # create tokenizers from the training set
         self.tokenizer_pt, self.tokenizer_en = self.tokenize_dataset(
             self.data_train
         )
 
     def tokenize_dataset(self, data):
-        """creates subword  tokenizers"""
-        training_corpus_en = []
-        training_corpus_pt = []
-        for pt, en in data:
-            training_corpus_en.append(en.numpy().decode('utf-8'))
-            training_corpus_pt.append(pt.numpy().decode('utf-8'))
+        """
+        create sub-word tokenizers for the dataset
 
-        pretrained_tokenizer_pt = transformers.AutoTokenizer.from_pretrained(
+        args:
+            data: tf.data.Dataset whose examples are formatted as (pt, en)
+                 pt is the portuguese sentence
+                 en is the english sentence
+        returns:
+            tokenizer_pt: portuguese tokenizer
+            tokenizer_en: english tokenizer
+        """
+        # collect portuguese and english sentences
+        pt_sentences = []
+        en_sentences = []
+
+        # convert dataset to lists of sentences
+        for pt, en in data:
+            pt_sentences.append(pt.numpy().decode())
+            en_sentences.append(en.numpy().decode())
+
+        # load pretrained tokenizers
+        tokenizer_pt = transformers.BertTokenizerFast.from_pretrained(
             'neuralmind/bert-base-portuguese-cased'
         )
-        pretrained_tokenizer_en = transformers.AutoTokenizer.from_pretrained(
+        tokenizer_en = transformers.BertTokenizerFast.from_pretrained(
             'bert-base-uncased'
         )
-        vocab_size = 2**13
-        self.tokenizer_pt = pretrained_tokenizer_pt.train_new_from_iterator(
-            training_corpus_en, vocab_size=vocab_size
+        tokenizer_pt = tokenizer_pt.train_new_from_iterator(
+            pt_sentences, vocab_size=2**13
         )
-        self.tokenizer_en = pretrained_tokenizer_en.train_new_from_iterator(
-            training_corpus_pt, vocab_size=vocab_size
+        tokenizer_en = tokenizer_en.train_new_from_iterator(
+            en_sentences, vocab_size=2**13
         )
-        return self.tokenizer_pt, self.tokenizer_en
+        return tokenizer_pt, tokenizer_en
+
+    def encode(self, pt, en):
+        """
+        encodes portuguese and english sentences into token sequences
+
+        args:
+            pt tf.tensor containing portuguese sentence
+            en tf.tensor containing english sentence
+
+        returns:
+            tuple of two np.ndarrays
+            portuguese tokens with start and end tokens
+            english tokens with start and end tokens
+        """
+        pt_vocab_size = self.tokenizer_pt.vocab_size
+        en_vocab_size = self.tokenizer_en.vocab_size
+
+        pt_tokens = [pt_vocab_size] + \
+            self.tokenizer_pt.encode(pt.numpy().decode()) + \
+            [pt_vocab_size + 1]
+
+        en_tokens = [en_vocab_size] + \
+            self.tokenizer_en.encode(en.numpy().decode()) + \
+            [en_vocab_size + 1]
+
+        return np.array(pt_tokens), np.array(en_tokens)
