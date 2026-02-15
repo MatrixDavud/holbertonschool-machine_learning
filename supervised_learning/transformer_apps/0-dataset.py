@@ -19,17 +19,15 @@ class Dataset:
         validation datasets. Also initializes tokenizers for
         Portuguese and English.
         """
-        # Load the Portuguese to English translation dataset
-        self.data_train = tfds.load(
+        # Load both splits at once (might be faster)
+        datasets = tfds.load(
             'ted_hrlr_translate/pt_to_en',
-            split='train',
+            split=['train', 'validation'],
             as_supervised=True
         )
-        self.data_valid = tfds.load(
-            'ted_hrlr_translate/pt_to_en',
-            split='validation',
-            as_supervised=True
-        )
+        
+        self.data_train = datasets[0]
+        self.data_valid = datasets[1]
 
         # Initialize tokenizers
         self.tokenizer_pt, self.tokenizer_en = self.tokenize_dataset(
