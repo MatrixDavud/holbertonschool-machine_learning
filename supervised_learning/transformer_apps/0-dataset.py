@@ -1,55 +1,48 @@
 #!/usr/bin/env python3
-"""
-Dataset loading for transformer.
-"""
-import tensorflow_datasets as tfds
-import transformers
+"""Class dataset, loading dataset for machine translation"""
 
+
+import transformers
+import tensorflow_datasets as tfds
 
 
 class Dataset:
-    """
-    asdsadsada
-    """
+    """loading dataset for machine translation"""
     def __init__(self):
-        """
-            Init the object.
-        """
-        examples, _ = tfds.load(
+        """class constructor for dataset class"""
+        self.data_train = tfds.load(
             'ted_hrlr_translate/pt_to_en',
-            as_supervised=True,
-            with_info=True
+            split='train',
+            as_supervised=True
         )
-
-        self.data_train = examples['train']
-        self.data_valid = examples['validation']
-        a, b = self.tokenize_dataset(self.data_train)
-        self.tokenizer_pt, self.tokenizer_en = a, b
+        self.data_valid = tfds.load(
+            'ted_hrlr_translate/pt_to_en',
+            split='validation',
+            as_supervised=True
+        )
+        self.tokenizer_pt, self.tokenizer_en = self.tokenize_dataset(
+            self.data_train
+        )
 
     def tokenize_dataset(self, data):
-        """
-            Tokenize dataset.
-        """
-
-        abv = "neuralmind/bert-base-portuguese-cased"
-        tpt = transformers.AutoTokenizer.from_pretrained(abv)
-        ten = transformers.AutoTokenizer.from_pretrained("bert-base-uncased")
-
-        pt_sentences = []
-        en_sentences = []
-
+        """creates subword  tokenizers"""
+        training_corpus_en = []
+        training_corpus_pt = []
         for pt, en in data:
-            pt_sentences.append(pt.numpy().decode('utf-8'))
-            en_sentences.append(en.numpy().decode('utf-8'))
+            training_corpus_en.append(en.numpy().decode('utf-8'))
+            training_corpus_pt.append(pt.numpy().decode('utf-8'))
 
-        tpt = tpt.train_new_from_iterator(
-            pt_sentences,
-            vocab_size=2**13
+        pretrained_tokenizer_pt = transformers.AutoTokenizer.from_pretrained(
+            'neuralmind/bert-base-portuguese-cased'
         )
-
-        ten = ten.train_new_from_iterator(
-            en_sentences,
-            vocab_size=2**13
+        pretrained_tokenizer_en = transformers.AutoTokenizer.from_pretrained(
+            'bert-base-uncased'
         )
-
-        return tpt, ten
+        vocab_size = 2**13
+        self.tokenizer_pt = pretrained_tokenizer_pt.train_new_from_iterator(
+            training_corpus_en, vocab_size=vocab_size
+        )
+        self.tokenizer_en = pretrained_tokenizer_en.train_new_from_iterator(
+            training_corpus_pt, vocab_size=vocab_size
+        )
+        return self.tokenizer_pt, self.tokenizer_en
