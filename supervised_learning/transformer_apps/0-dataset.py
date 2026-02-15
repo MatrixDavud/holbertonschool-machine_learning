@@ -20,15 +20,21 @@ class Dataset:
         Portuguese and English.
         """
         # Load the Portuguese to English translation dataset
-        self.data_train = tfds.load('ted_hrlr_translate/pt_to_en',
-                                    split='train', as_supervised=True)
-        self.data_valid = tfds.load('ted_hrlr_translate/pt_to_en',
-                                    split='validation',
-                                    as_supervised=True)
+        self.data_train = tfds.load(
+            'ted_hrlr_translate/pt_to_en',
+            split='train',
+            as_supervised=True
+        )
+        self.data_valid = tfds.load(
+            'ted_hrlr_translate/pt_to_en',
+            split='validation',
+            as_supervised=True
+        )
 
         # Initialize tokenizers
         self.tokenizer_pt, self.tokenizer_en = self.tokenize_dataset(
-            self.data_train)
+            self.data_train
+        )
 
     def tokenize_dataset(self, data):
         """
@@ -44,9 +50,11 @@ class Dataset:
             tokenizer_en: Tokenizer for English.
         """
         # Load the pre-trained tokenizers directly
-        tokenizer_pt = transformers.BertTokenizerFast.from_pretrained(
-            'neuralmind/bert-base-portuguese-cased')
-        tokenizer_en = transformers.BertTokenizerFast.from_pretrained(
-            'bert-base-uncased')
+        tokenizer_pt = transformers.AutoTokenizer.from_pretrained(
+            'neuralmind/bert-base-portuguese-cased'
+        )
+        tokenizer_en = transformers.AutoTokenizer.from_pretrained(
+            'bert-base-uncased'
+        )
 
         return tokenizer_pt, tokenizer_en
