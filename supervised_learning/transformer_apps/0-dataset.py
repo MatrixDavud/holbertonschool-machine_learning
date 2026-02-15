@@ -4,7 +4,7 @@ Dataset module for Portuguese to English translation
 """
 
 import tensorflow_datasets as tfds
-from transformers import AutoTokenizer
+import transformers
 
 
 class Dataset:
