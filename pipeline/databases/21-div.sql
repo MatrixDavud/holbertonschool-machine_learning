@@ -1,16 +1,16 @@
--- This script creates a SQL function SafeDiv that safely divides two integers.
--- It returns a / b if b is not zero, otherwise returns 0.
+-- Creates a function SafeDiv that divides two numbers safely
+DROP FUNCTION IF EXISTS SafeDiv;
 
 DELIMITER $$
 
 CREATE FUNCTION SafeDiv(a INT, b INT)
-RETURNS INT
+RETURNS FLOAT
 DETERMINISTIC
 BEGIN
     IF b = 0 THEN
         RETURN 0;
     ELSE
-        RETURN a DIV b;
+        RETURN a / b;
     END IF;
 END$$
 
